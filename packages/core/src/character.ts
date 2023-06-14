@@ -10,6 +10,8 @@
 
 
 
+import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
+import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 
 
@@ -73,6 +75,12 @@
 
 
 
+      new MeshStandardMaterial({ color: 0xffff00, wireframe: true }),
+    );
+    this.head.position.set(
+      model.position.x,
+      model.position.y + this.boundingSize.y * 0.85,
+      model.position.z,
 
 
 
@@ -111,6 +119,7 @@
 
 
 
+        (error) => console.log(`Error loading ${this.modelUrl}: ${error}`),
 
 
 
@@ -123,6 +132,7 @@
 
 
 
+        (error) => console.log(`Error loading ${this.modelUrl}: ${error}`),
 
 
 
@@ -157,21 +167,11 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        (child as Mesh).material = new MeshStandardMaterial({
+          color: 0xff0000,
+          transparent: true,
+          opacity: 0,
+        });
 
 
 

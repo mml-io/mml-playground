@@ -19,7 +19,7 @@
 
 
 
-
+    _maskActive?: boolean,
 
 
 

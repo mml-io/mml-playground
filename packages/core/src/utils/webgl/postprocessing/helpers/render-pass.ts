@@ -17,6 +17,7 @@
 
 
 
+    clearAlpha = 0,
 
 
 
@@ -36,8 +37,7 @@
 
 
 
-
-
+    _maskActive?: boolean,
 
 
 

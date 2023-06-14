@@ -2,6 +2,12 @@
 
 
 
+export type ClientUpdate = {
+  id: number;
+  location: Vector2;
+  rotation: Vector2;
+  state: AnimationState;
+};
 
 
 
@@ -24,15 +30,9 @@
 
 
 
-
-
-
-
-
-
-
-
-
+                  this.connection.ws?.send(
+                    JSON.stringify({ type: "pong", id: this.connection.clientId }),
+                  );
 
 
 

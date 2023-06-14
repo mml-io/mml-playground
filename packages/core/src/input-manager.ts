@@ -38,7 +38,7 @@
 
 
 
-
+      -(event.clientY / window.innerHeight) * 2 + 1,
 
 
 

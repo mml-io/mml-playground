@@ -1,323 +1,323 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<html>
+  <body>
+    <m-group id="slots"> </m-group>
+
+    <script>
+      //{PLAYGROUND_RUNTIME_CONSTANTS}
+
+      const DOCUMENT_LIFETIME_DURATION_S = 60 * 20;
+
+      const SLOT_WIDTH = 12;
+      const SLOT_DEPTH = 12;
+      const SLOT_BORDER_THICKNESS = 1;
+      const SPACE_BETWEEN_SLOTS = 3;
+      const INTERACTIVE_SLOT_COUNT_X = 5;
+      const INTERACTIVE_SLOT_COUNT_Z = 4;
+
+      const SLOT_EMPTY_COLOR = "#a3e635";
+      const SLOT_OCCUPIED_COLOR = "#FFFFFF";
+      const SLOT_BASE_COLOR = "#222222";
+      const SLOT_LABEL_COLOR = "#737373";
+      const SLOT_LABEL_TEXT_COLOR = "#FFFFFF";
+
+      const DEMO_SLOTS = [
+        {
+          x: -20,
+          z: (SLOT_DEPTH + SPACE_BETWEEN_SLOTS) * 0,
+          documentUrl: `${EXAMPLES_HOST_URL}/duck.html`,
+          title: "The Duck",
+        },
+        {
+          x: -20,
+          z: (SLOT_DEPTH + SPACE_BETWEEN_SLOTS) * 1,
+          documentUrl: `${EXAMPLES_HOST_URL}/dice.html`,
+
+        },
+
+
+
+
+
+
+      ];
+
+      class Slot {
+        constructor(config) {
+          this.config = config;
+
+          // Generate random id for this slot
+          this.id = Math.floor(Math.random() * Date.now());
+
+          this.documentUrl = null;
+
+          // Keep track of which user set the document
+          this.documentConnectionId = null;
+          this.documentUrlSetAt = null;
+
+          this.createElement();
+          this.updateDocumentPrompt();
+
+          // Check and update slot state every second
+          this.updateState();
+          setInterval(() => {
+            this.updateState();
+          }, 500);
+        }
+
+        createElement() {
+          const documentFrameContent = `
+            <m-frame
+              class="document-frame"
+
+            ></m-frame>`;
+
+          const documentFrameBaseContent = `
+            <m-cube
+              class="document-frame-base"
+              width="${SLOT_WIDTH - SLOT_BORDER_THICKNESS * 2}"
+              depth="${SLOT_DEPTH - SLOT_BORDER_THICKNESS * 2}"
+              height="0.2"
+              color=${SLOT_EMPTY_COLOR}
+            ></m-cube>`;
+
+          const slotBaseContent = `
+            <m-cube
+              class="slot-base"
+              width="${SLOT_WIDTH}"
+              depth="${SLOT_DEPTH}"
+              height="0.025"
+              color="${SLOT_BASE_COLOR}"
+            ></m-cube>`;
+
+          const removeDocumentContent = `
+            <m-group 
+              class="remove-document" 
+              visible-to=""
+              x="${(SLOT_WIDTH - SLOT_BORDER_THICKNESS) / 2}"
+              z="${(SLOT_DEPTH - SLOT_BORDER_THICKNESS) / 2}"
+            >
+              <m-cube
+                class="remove-document-button"
+                width="${SLOT_BORDER_THICKNESS}"
+                depth="${SLOT_BORDER_THICKNESS}"
+                height="0.5"
+                color="#b91c1c"
+              ></m-cube>
+
+              <m-label
+                class="remove-document-label"
+                content="\nRemove\ndocument"
+                color="#f87171"
+                font-size="18"
+                alignment="left"
+                width="${SLOT_BORDER_THICKNESS}"
+                height="1"
+                rx="-90"
+                rz="90"
+                y="0.26"
+              ></m-label>
+            </m-group>
+          `;
+
+          const documentLabelsContent = [
+            {
+              rz: 0,
+              z: (SLOT_DEPTH - SLOT_BORDER_THICKNESS) / 2,
+            },
+            {
+              rz: 90,
+              x: (SLOT_WIDTH - SLOT_BORDER_THICKNESS) / 2,
+            },
+            {
+              rz: 180,
+              z: (SLOT_DEPTH - SLOT_BORDER_THICKNESS) / -2,
+            },
+            {
+              rz: 270,
+              x: (SLOT_WIDTH - SLOT_BORDER_THICKNESS) / -2,
+            },
+          ].map(
+            (labelConfig) => `
+            <m-label
+              class="document-label"
+              content=""
+              color="${SLOT_LABEL_COLOR}"
+              font-color="${SLOT_LABEL_TEXT_COLOR}"
+              alignment="center"
+              width="${SLOT_DEPTH}"
+              height="${SLOT_BORDER_THICKNESS}"
+              rx="-90"
+              y="0.05"
+
+              rz="${labelConfig.rz}"
+              z="${labelConfig.z || 0}"
+              x="${labelConfig.x || 0}"
+            ></m-label>
+          `,
+          );
+
+          const slotElem = document.createElement("m-group");
+          slotElem.id = this.id;
+          slotElem.setAttribute("x", this.config.x);
+          slotElem.setAttribute("z", this.config.z);
+
+          slotElem.innerHTML = `
+            ${documentFrameContent}
+            ${documentFrameBaseContent}
+            ${slotBaseContent}
+            ${documentLabelsContent}
+            ${removeDocumentContent}
+          `;
+
+          const slotsGroup = document.getElementById("slots");
+          slotsGroup.append(slotElem);
+
+          // Set element references
+          this.documentFrameElem = slotElem.querySelector(".document-frame");
+          this.documentFrameBaseElem = slotElem.querySelector(".document-frame-base");
+          this.slotBaseElem = slotElem.querySelector(".slot-base");
+          this.documentLabelElems = slotElem.getElementsByClassName("document-label");
+          this.removeDocumentElem = slotElem.querySelector(".remove-document");
+          this.slotElem = slotElem;
+
+          if (this.config.documentUrl) {
+            this.setDocumentUrl(this.config.documentUrl);
+          }
+
+          // Removing slot document
+          if (!this.config.documentUrl) {
+            this.removeDocumentElem.addEventListener("click", () => {
+              this.removeDocumentUrl();
+            });
+          }
+        }
+
+        setDocumentUrl(documentUrl, connectionId) {
+          if (this.documentUrl) {
+            console.log("Slot is already taken");
+            return;
+          }
+
+          this.documentUrl = documentUrl;
+          this.documentConnectionId = connectionId;
+          this.documentFrameElem.setAttribute("src", documentUrl);
+          this.documentUrlSetAt = new Date();
+
+          if (connectionId) {
+            this.removeDocumentElem.setAttribute("visible-to", connectionId);
+          }
+
+          this.documentFrameBaseElem.setAttribute("color", SLOT_OCCUPIED_COLOR);
+
+          this.updateDocumentPrompt();
+        }
+
+        removeDocumentUrl() {
+          this.documentFrameElem.removeAttribute("src");
+          this.documentUrl = null;
+          this.documentConnectionId = null;
+          this.documentUrlSetAt = null;
+
+          this.documentFrameBaseElem.setAttribute("color", SLOT_EMPTY_COLOR);
+
+          this.removeDocumentElem.setAttribute("visible-to", "");
+
+          this.updateLabels("Click slot to showcase your MML document");
+          this.updateDocumentPrompt();
+        }
+
+        updateLabels(value) {
+          for (const labelElem of this.documentLabelElems) {
+            labelElem.setAttribute("content", value);
+          }
+        }
+
+        updateState() {
+          const now = new Date();
+
+          // Demo slot
+          if (this.config.documentUrl) {
+            this.updateLabels(this.config.title);
+          }
+
+          // Interactive slot
+          else {
+            if (this.documentUrl) {
+              const documentLifetime = (now - this.documentUrlSetAt) / 1000;
+              const secondsRemaining = Math.ceil(DOCUMENT_LIFETIME_DURATION_S - documentLifetime);
+
+              const labelMinutes = Math.floor(secondsRemaining / 60);
+              const labelSeconds = secondsRemaining - labelMinutes * 60;
+              const remainingTimeLabel =
+                labelMinutes > 0 ? `${labelMinutes}:${labelSeconds}` : `${labelSeconds}s`;
+
+              this.updateLabels(`Document expires in ${remainingTimeLabel}`);
+
+              // Empty interactive slots after their document's lifetime
+              if (documentLifetime > DOCUMENT_LIFETIME_DURATION_S) {
+                this.removeDocumentUrl();
+              }
+            } else {
+              this.updateLabels("Click slot to showcase your MML document");
+            }
+          }
+        }
+
+        updateDocumentPrompt() {
+          const currentPromptContainerElem = this.slotElem.querySelector(
+            ".document-prompt-container",
+          );
+          if (currentPromptContainerElem) {
+            currentPromptContainerElem.remove();
+          }
+
+          const newPromptContainerElem = document.createElement("m-group");
+          newPromptContainerElem.className = "document-prompt-container";
+          newPromptContainerElem.innerHTML =
+            this.config.documentUrl || this.documentUrl
+              ? ""
+              : `
+            <m-prompt
+              class="document-prompt"
+              message="Enter document Web Socket URL"
+              placeholder="wss://..."
+            >
+              <m-cube
+                width="${SLOT_WIDTH - SLOT_BORDER_THICKNESS * 2}"
+                depth="${SLOT_DEPTH - SLOT_BORDER_THICKNESS * 2}"
+                height="0.21"
+                color=${SLOT_EMPTY_COLOR}
+              ></m-cube>
+            </m-prompt>`;
+
+          this.slotElem.append(newPromptContainerElem);
+
+          this.documentPromptElem = newPromptContainerElem.querySelector(".document-prompt");
+          if (this.documentPromptElem) {
+            this.documentPromptElem.addEventListener("prompt", (e) => {
+              this.setDocumentUrl(e.detail.value, e.detail.connectionId);
+            });
+          }
+        }
+      }
+
+      const interactiveSlots = [];
+      const demoSlots = [];
+
+      for (let x = 0; x < INTERACTIVE_SLOT_COUNT_X; x++) {
+        for (let z = 0; z < INTERACTIVE_SLOT_COUNT_Z; z++) {
+          const slot = new Slot({
+            x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * x,
+            z: (SLOT_DEPTH + SPACE_BETWEEN_SLOTS) * z,
+          });
+          interactiveSlots.push(slot);
+        }
+      }
+
+      for (const config of DEMO_SLOTS) {
+        const slot = new Slot(config);
+        demoSlots.push(slot);
+      }
+    </script>
+  </body>
+</html>

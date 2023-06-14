@@ -36,7 +36,7 @@
 
 
 
-
+    _maskActive?: boolean,
 
 
 

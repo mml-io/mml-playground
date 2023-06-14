@@ -1,3 +1,5 @@
+# Node
+node_modules
 
 
 
@@ -5,33 +7,31 @@
 
 
 
+.yarn-integrity
+.pnp
+.pnp.js
+tsconfig.tsbuildinfo
+.eslintcache
+
+# OS
+.DS_Store
+
+# Artifacts
 
 
+# IDEs and editors
 
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.vscode/*
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# dotenv files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

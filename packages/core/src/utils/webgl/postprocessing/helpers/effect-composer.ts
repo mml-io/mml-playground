@@ -1,3 +1,11 @@
+import {
+  Clock,
+  LinearFilter,
+  RGBAFormat,
+  Vector2,
+  type WebGLRenderer,
+  WebGLRenderTarget,
+} from "three";
 
 
 
@@ -33,19 +41,11 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+      renderTarget = new WebGLRenderTarget(
+        this.width * this.pixelRatio,
+        this.height * this.pixelRatio,
+        parameters,
+      );
 
 
 

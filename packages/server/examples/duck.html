@@ -1,28 +1,28 @@
+<m-model
+  id="duck"
+  src="https://mml.infura-ipfs.io/ipfs/QmR65KJAkDzriDx7YMQVBHvK5ENQ2MAihFzPALx5hcHmxQ"
+  rx="180"
+  rz="180"
+  sx="2"
+  sy="2"
+  sz="2"
+  y="0"
+  ry="-45.00000000000001"
+  z="0"
+  x="0"
+></m-model>
 
+<script>
+  //{PLAYGROUND_RUNTIME_CONSTANTS}
 
+  let r = 0;
 
+  function rotateDuck() {
+    r += 45;
+    document.getElementById("duck").setAttribute("ry", r);
+  }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  setInterval(() => {
+    rotateDuck();
+  }, 500);
+</script>

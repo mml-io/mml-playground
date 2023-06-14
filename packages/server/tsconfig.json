@@ -6,6 +6,7 @@
 
 
 
+    "esModuleInterop": true,
 
 
 
@@ -15,6 +16,5 @@
 
 
 
-
-
+  "include": ["./src/**/*.ts"]
 

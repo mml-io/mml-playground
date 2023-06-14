@@ -31,8 +31,8 @@
 
 
 
-
-
+export interface IShader<U extends TUniforms, D extends TDefines | undefined = undefined>
+  extends Shader {
 
 
 

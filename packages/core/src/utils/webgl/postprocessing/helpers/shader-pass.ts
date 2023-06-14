@@ -41,7 +41,7 @@
 
 
 
-
+    _maskActive?: boolean,
 
 
 

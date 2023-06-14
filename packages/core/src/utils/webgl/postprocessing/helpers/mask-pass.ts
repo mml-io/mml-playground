@@ -24,7 +24,7 @@
 
 
 
-
+    _maskActive: boolean,
 
 
 

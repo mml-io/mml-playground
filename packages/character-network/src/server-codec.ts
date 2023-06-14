@@ -4,12 +4,12 @@
 
 
 
-
-
-
-
-
-
+export type ClientUpdate = {
+  id: number;
+  location: Vector2;
+  rotation: Vector2;
+  state: AnimationState;
+};
 
 
 

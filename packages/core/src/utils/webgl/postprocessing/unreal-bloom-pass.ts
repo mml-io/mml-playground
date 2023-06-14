@@ -60,6 +60,13 @@
 
 
 
+  constructor(
+    resolution: Vector2 = new Vector2(512, 512),
+    strength = 1.5,
+    radius = 0.4,
+    threshold = 0.85,
+    nMips = 5,
+  ) {
 
 
 
@@ -137,6 +144,8 @@
 
 
 
+      this.compositeMaterial.uniforms[`blurTexture${i + 1}`]!.value =
+        this.renderTargetsVertical[i]!.texture;
 
 
 
@@ -204,6 +213,7 @@
 
 
 
+    maskActive: boolean,
 
 
 
@@ -239,18 +249,8 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+      this.separableBlurMaterials[i]!.uniforms.colorTexture!.value =
+        this.renderTargetsHorizontal[i]!.texture;
 
 
 
