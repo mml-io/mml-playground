@@ -31,14 +31,14 @@
           x: -20,
           z: (SLOT_DEPTH + SPACE_BETWEEN_SLOTS) * 1,
           documentUrl: `${EXAMPLES_HOST_URL}/dice.html`,
-
+          title: "The Dice",
         },
-
-
-
-
-
-
+        {
+          x: -20,
+          z: (SLOT_DEPTH + SPACE_BETWEEN_SLOTS) * 2,
+          documentUrl: `${EXAMPLES_HOST_URL}/videoplayer.html`,
+          title: "Video Player",
+        },
       ];
 
       class Slot {
@@ -68,7 +68,7 @@
           const documentFrameContent = `
             <m-frame
               class="document-frame"
-
+              y="0.2"
             ></m-frame>`;
 
           const documentFrameBaseContent = `

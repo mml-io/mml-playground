@@ -1,25 +1,25 @@
-
+import {
   CircleGeometry,
-
-
-
+  FrontSide,
+  Group,
+  LoadingManager,
   MathUtils,
-
+  Mesh,
   MeshPhongMaterial,
   NearestFilter,
   PMREMGenerator,
-
+  RepeatWrapping,
   Scene,
-
-
-
+  Texture,
+  TextureLoader,
+  Vector3,
   WebGLRenderTarget,
   WebGLRenderer,
-
+} from "three";
 import { Sky } from "three/examples/jsm/objects/Sky.js";
 
-
-
+export class Room {
+  private onLoadCallback: (room: Group) => void;
   private floorSize = 200;
   private floorTexture: Texture | null = null;
   private floorGeometry = new CircleGeometry(this.floorSize, 32);
@@ -30,7 +30,7 @@ import { Sky } from "three/examples/jsm/objects/Sky.js";
   private skyParameters = {
     elevation: 45,
     azimuth: 180,
-
+  };
   private sunPosition = new Vector3();
   private pmremGenerator: PMREMGenerator | null = null;
   private skyRenderTarget: WebGLRenderTarget | null = null;
@@ -38,7 +38,7 @@ import { Sky } from "three/examples/jsm/objects/Sky.js";
   public group: Group = new Group();
 
   constructor(scene: Scene, renderer: WebGLRenderer, onLoadCallback: (room: Group) => void) {
-
+    this.onLoadCallback = onLoadCallback;
     this.floorTexture = new TextureLoader(new LoadingManager()).load(
       "/assets/textures/checker.png",
       () => {
@@ -50,7 +50,7 @@ import { Sky } from "three/examples/jsm/objects/Sky.js";
           color: 0xffffff,
           side: FrontSide,
           map: this.floorTexture,
-
+        });
         this.floorMesh = new Mesh(this.floorGeometry, this.floorMaterial);
         this.floorMesh.receiveShadow = true;
         this.floorMesh.rotation.x = Math.PI * -0.5;
@@ -74,7 +74,7 @@ import { Sky } from "three/examples/jsm/objects/Sky.js";
         this.group.add(this.floorMesh);
         this.group.add(this.sky);
         this.onLoadCallback(this.group);
-
-
-
-
+      },
+    );
+  }
+}

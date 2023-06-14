@@ -10,13 +10,13 @@
   rz="0"
   onclick="rollDice()"
 ></m-model>
-
+<script>
   function lerp(start, end, t) {
-
+    return start * (1 - t) + end * t;
   }
 
   function radToDeg(radians) {
-
+    return radians * (180 / Math.PI);
   }
 
   let rollResult = 1;
@@ -94,4 +94,4 @@
       }
     }, interval);
   }
-
+</script>

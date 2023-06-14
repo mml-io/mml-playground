@@ -1,4 +1,4 @@
-
+<m-group sx="0.4" sy="0.4" ry="90">
   <m-video
     z="3"
     y="7"
@@ -77,10 +77,10 @@
       color="green"
       font-color="white"
     ></m-label>
-
-
-
-
+  </m-video>
+</m-group>
+<script>
+  function updateAttributesLabel(videoTag) {
     const attributes = [];
     for (const attr of videoTag.getAttributeNames()) {
       const val = videoTag.getAttribute(attr);
@@ -90,32 +90,32 @@
     if (attributesLabel) {
       attributesLabel.setAttribute("content", `<m-video ${attributes.join(" ")}></m-video>`);
     }
+  }
 
-
-
+  function restart(videoTag) {
     videoTag.setAttribute("pause-time", document.timeline.currentTime);
     videoTag.setAttribute("start-time", document.timeline.currentTime);
     videoTag.removeAttribute("pause-time");
     updateAttributesLabel(videoTag);
+  }
 
-
-
+  function toggleEnabled(videoTag) {
     const enabled = videoTag.getAttribute("enabled") !== "false";
     videoTag.setAttribute("enabled", (!enabled).toString());
     updateAttributesLabel(videoTag);
+  }
 
-
-
+  function pause(videoTag) {
     videoTag.setAttribute("pause-time", document.timeline.currentTime);
     updateAttributesLabel(videoTag);
+  }
 
-
-
+  function unpause(videoTag) {
     videoTag.removeAttribute("pause-time");
     updateAttributesLabel(videoTag);
+  }
 
-
-
+  function resume(videoTag) {
     if (!videoTag.hasAttribute("pause-time")) return;
     const startTime = parseFloat(videoTag.getAttribute("start-time")) || 0;
     const pauseTime = parseFloat(videoTag.getAttribute("pause-time")) || 0;
@@ -124,9 +124,9 @@
     videoTag.removeAttribute("pause-time");
     videoTag.setAttribute("start-time", newStartTime);
     updateAttributesLabel(videoTag);
+  }
 
-
-
+  for (const video of document.querySelectorAll("m-video")) {
     updateAttributesLabel(video);
-
+  }
 </script>

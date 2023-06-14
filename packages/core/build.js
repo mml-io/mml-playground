@@ -10,7 +10,7 @@
 
 
 
-
+  format: "esm",
   outdir: "dist",
 
 

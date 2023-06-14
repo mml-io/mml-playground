@@ -6,7 +6,7 @@ import { Network } from "@mml-playground/character-network";
 import chokidar from "chokidar";
 import express, { Request } from "express";
 import enableWs from "express-ws";
-
+import httpProxy from "http-proxy";
 import { LocalObservableDomFactory, EditableNetworkedDOM } from "networked-dom-server";
 
 const PLAYGROUND_DOCUMENT_PATH = path.resolve(__dirname, "../playground.html");
@@ -34,15 +34,15 @@ const playgroundDocument = new EditableNetworkedDOM(
   LocalObservableDomFactory,
 );
 
+const updateExamplesHostUrl = (req: Request) => {
+  examplesHostUrl = `${req.secure ? "wss" : "ws"}://${
+    req.headers["x-forwarded-host"]
+      ? `${req.headers["x-forwarded-host"]}:${req.headers["x-forwarded-port"]}`
+      : req.headers.host
+  }${EXAMPLE_DOCUMENTS_SOCKET_PATH}`;
 
-
-
-
-
-
-
-
-
+  playgroundDocument.load(getMmlDocumentContent(PLAYGROUND_DOCUMENT_PATH));
+};
 
 playgroundDocument.load(getMmlDocumentContent(PLAYGROUND_DOCUMENT_PATH));
 
@@ -59,13 +59,13 @@ app.ws(DOCUMENT_SOCKET_PATH, (ws) => {
   });
 });
 
-
-
-
-
-
-
-
+// Execute example documents
+const exampleDocuments: {
+  [key: string]: {
+    documentPath: string;
+    document: EditableNetworkedDOM;
+  };
+} = {};
 
 // Create character network
 const characterNetwork = new Network();
