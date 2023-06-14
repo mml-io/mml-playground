@@ -6,7 +6,7 @@ import {
   CameraManager,
   Composer,
   InputManager,
-
+  CoreMMLScene,
   RunTime,
   Network,
 } from "@mml-playground/core";
@@ -20,7 +20,7 @@ export class App {
 
   private scene: Scene;
   private group: Group;
-
+  private mmlScene: CoreMMLScene;
 
   private inputManager: InputManager;
 

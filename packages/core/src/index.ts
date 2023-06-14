@@ -6,7 +6,7 @@ export { CharacterManager } from "./character-manager";
 export { Composer } from "./composer";
 export { InputManager } from "./input-manager";
 export { MaterialManager } from "./material-manager";
-
+export { CoreMMLScene } from "./core-mml-scene";
 export { RunTime } from "./run-time-controller";
 export { type AnimationState, type ClientUpdate, Network } from "./utils/network/network";
 export { networkDebugOverlay } from "./utils/network/network-debug";

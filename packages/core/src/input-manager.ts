@@ -23,7 +23,7 @@ export class InputManager {
     document.addEventListener("keyup", this.onKeyUp.bind(this));
   }
 
-
+  onMouseDown(_event: MouseEvent): void {}
 
   onPointerLockChange(): void {
     this.mouseCaptured = document.pointerLockElement === document.body;
