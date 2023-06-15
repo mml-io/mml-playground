@@ -19,12 +19,6 @@ export class ServerCodec {
   decoder: TextDecoder = new TextDecoder();
 
   getId(): number {
-    // if (this.recycledIds.length > 0) {
-    //   return this.recycledIds.shift() as number;
-    // } else {
-    //   return this.nextId++;
-    // }
-    // /* TODO: temporary fix until we improve the ID recycling */
     return this.nextId++;
   }
 
