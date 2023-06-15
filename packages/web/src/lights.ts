@@ -12,7 +12,7 @@ export class Lights {
 
     this.ambientLight = new AmbientLight(0xffffff, 0.1);
     this.directionalLight = new DirectionalLight(0xffffff, 1.1);
-    this.directionalLight.position.set(0, 15, -6);
+    this.directionalLight.position.set(0, 15, -8);
     this.directionalLight.updateMatrixWorld();
 
     const direction = new Vector3();
