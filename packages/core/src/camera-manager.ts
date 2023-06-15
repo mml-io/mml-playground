@@ -14,6 +14,7 @@ export class CameraManager {
   camera: PerspectiveCamera;
   target: Vector3 = new Vector3(0, 1.55, 0);
   targetDistance: number;
+  maxTargetDistance: number = 20;
   distance: number;
   targetPhi: number | null = null;
   phi: number | null = null;
@@ -71,6 +72,7 @@ export class CameraManager {
     const scrollAmount = event.deltaY * 0.01;
     this.targetDistance += scrollAmount;
     this.targetDistance = Math.max(0, this.targetDistance);
+    this.targetDistance = Math.min(this.targetDistance, this.maxTargetDistance)
   }
 
   onPointerLockChange(): void {
