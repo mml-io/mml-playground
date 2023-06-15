@@ -27,7 +27,7 @@ dist
 *.launch
 .settings/
 *.sublime-workspace
-.vscode/*
+.vscode
 
 # dotenv files
 .env
