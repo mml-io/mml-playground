@@ -20,7 +20,7 @@
     "@types/three": "^0.150.1"
   },
   "dependencies": {
-    "mml-web": "0.0.42",
+    "mml-web": "0.1.0",
     "three": "^0.150.1",
     "tweakpane": "^3.1.9"
   }

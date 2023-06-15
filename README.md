@@ -6,7 +6,7 @@ your own end-to-end live, multiplayer experience using the the unique, real-time
 
 It can be easily deployed to environments that support Node.js and expose ports to the internet.
 
-<img src="Playground.png">
+<img src="https://raw.githubusercontent.com/mml-io/mml-playground/main/Playground.png">
 
 ## Main features
 
