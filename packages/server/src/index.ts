@@ -88,6 +88,10 @@ app.ws(`${EXAMPLE_DOCUMENTS_SOCKET_PATH}/:filename`, (ws, req) => {
   });
 });
 
+const FORK_PAGE_CONTENT = `
+  Please click the 'Fork' button to create your sandbox.
+`;
+
 // Serve frontend statically in production
 if (process.env.NODE_ENV === "production") {
   const demoModulePath = require
@@ -95,6 +99,11 @@ if (process.env.NODE_ENV === "production") {
     .replace("package.json", "dist");
   const demoIndexContent = fs.readFileSync(path.join(demoModulePath, "index.html"), "utf8");
   app.get("/", (req, res) => {
+    if (process.env.DISABLE_SERVER === "true") {
+      res.send(FORK_PAGE_CONTENT);
+      return;
+    }
+
     updateExamplesHostUrl(req);
     res.send(demoIndexContent);
   });
@@ -111,6 +120,11 @@ else {
   });
 
   app.get("/*", (req, res) => {
+    if (process.env.DISABLE_SERVER === "true") {
+      res.send(FORK_PAGE_CONTENT);
+      return;
+    }
+
     updateExamplesHostUrl(req);
     proxy.web(req, res);
   });
