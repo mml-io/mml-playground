@@ -51,7 +51,7 @@ a free slot.
 
 Click the button below to create a new sandbox on CodeSandbox.io.
 
-[![Edit mml-playground on CodeSandbox](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/github/mml-io/mml-playground)
+[![Edit mml-playground on CodeSandbox](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/p/sandbox/4zf432)
 
 Once your sandbox is initialized, select the 'start: 8080' tab to view the running playground.
 
