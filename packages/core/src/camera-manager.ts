@@ -15,16 +15,17 @@ export class CameraManager {
   target: Vector3 = new Vector3(0, 1.55, 0);
   targetDistance: number;
   distance: number;
-  targetPhi: number;
-  phi: number;
-  targetTheta: number;
-  theta: number;
+  targetPhi: number | null = null;
+  phi: number | null = null;
+  targetTheta: number | null = null;
+  theta: number | null = null;
 
   cubeRenderTarget: WebGLCubeRenderTarget = new WebGLCubeRenderTarget(256);
   cubeCamera: CubeCamera = new CubeCamera(1, 100, this.cubeRenderTarget);
 
-  mouseCaptured: boolean;
+  mouseCaptured: boolean = false;
   dragging: boolean = false;
+  firstMouseInteraction: boolean = false;
 
   constructor() {
     this.camera = new PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.1, 2000);
@@ -34,11 +35,6 @@ export class CameraManager {
 
     this.targetDistance = 2.5;
     this.distance = this.targetDistance;
-
-    this.phi = this.targetPhi = Math.PI / 2;
-    this.theta = this.targetTheta = Math.PI / 2;
-
-    this.mouseCaptured = false;
 
     document.addEventListener("mousedown", this.onMouseDown.bind(this));
     document.addEventListener("mouseup", this.onMouseUp.bind(this));
@@ -50,6 +46,12 @@ export class CameraManager {
 
   onMouseDown(_event: MouseEvent): void {
     if (this.dragging === false) this.dragging = true;
+    if (this.phi === null || this.theta === null) {
+      this.phi = this.targetPhi = Math.PI / 2;
+      this.theta = this.targetTheta = Math.PI / 2;
+      this.reverseUpdateFromPositions();
+      this.firstMouseInteraction = true;
+    }
   }
 
   onMouseUp(_event: MouseEvent): void {
@@ -58,6 +60,7 @@ export class CameraManager {
 
   onMouseMove(event: MouseEvent): void {
     if (this.dragging === false) return;
+    if (this.targetTheta === null || this.targetPhi === null) return;
     this.targetTheta += event.movementX * 0.01;
     this.targetPhi -= event.movementY * 0.01;
     this.targetPhi = Math.max(Math.PI * 0.1, Math.min(Math.PI - Math.PI * 0.1, this.targetPhi));
@@ -88,6 +91,7 @@ export class CameraManager {
   }
 
   reverseUpdateFromPositions(): void {
+    if (this.phi === null || this.theta == null) return;
     const dx = this.camera.position.x - this.target.x;
     const dy = this.camera.position.y - this.target.y;
     const dz = this.camera.position.z - this.target.z;
@@ -103,16 +107,23 @@ export class CameraManager {
 
   update(): void {
     if (this.target === null) return;
+    if (this.firstMouseInteraction === false) return;
+    if (
+      this.phi !== null &&
+      this.targetPhi !== null &&
+      this.theta !== null &&
+      this.targetTheta !== null
+    ) {
+      this.distance += ease(this.targetDistance, this.distance, 0.02);
+      this.phi += ease(this.targetPhi, this.phi, 0.06);
+      this.theta += ease(this.targetTheta, this.theta, 0.06);
 
-    this.distance += ease(this.targetDistance, this.distance, 0.02);
-    this.phi += ease(this.targetPhi, this.phi, 0.06);
-    this.theta += ease(this.targetTheta, this.theta, 0.06);
+      const x = this.target.x + this.distance * Math.sin(this.phi) * Math.cos(this.theta);
+      const y = this.target.y + this.distance * Math.cos(this.phi);
+      const z = this.target.z + this.distance * Math.sin(this.phi) * Math.sin(this.theta);
 
-    const x = this.target.x + this.distance * Math.sin(this.phi) * Math.cos(this.theta);
-    const y = this.target.y + this.distance * Math.cos(this.phi);
-    const z = this.target.z + this.distance * Math.sin(this.phi) * Math.sin(this.theta);
-
-    this.camera.position.set(x, y, z);
-    this.camera.lookAt(this.target);
+      this.camera.position.set(x, y, z);
+      this.camera.lookAt(this.target);
+    }
   }
 }
