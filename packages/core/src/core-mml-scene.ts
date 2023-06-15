@@ -15,9 +15,11 @@ import { AudioListener, Group, PerspectiveCamera, Scene, Vector3, WebGLRenderer 
 export class CoreMMLScene {
   private mmlScene: Partial<IMMLScene>;
   private scenePosition: ScenePosition;
-  private clickTrigger: MMLClickTrigger;
   private promptManager: PromptManager;
   private elementsHolder: HTMLElement;
+  private audioListener: AudioListener;
+
+  private clickTrigger: MMLClickTrigger;
 
   constructor(
     group: Group,
@@ -33,8 +35,12 @@ export class CoreMMLScene {
     };
     const { interactionListener } = InteractionManager.init(camera, scene);
 
+    this.audioListener = new AudioListener();
+
+    document.addEventListener("mousedown", this.onMouseDown.bind(this));
+
     this.mmlScene = {
-      getAudioListener: () => new AudioListener(),
+      getAudioListener: () => this.audioListener,
       getRenderer: () => renderer,
       getThreeScene: () => scene,
       getRootContainer: () => group,
@@ -56,6 +62,12 @@ export class CoreMMLScene {
         this.promptManager.prompt(promptProps, callback);
       },
     };
+  }
+
+  onMouseDown() {
+    if (this.audioListener.context.state === "suspended") {
+      this.audioListener.context.resume();
+    }
   }
 
   traverseDOM(node: Node | null, callback: (node: Node) => void): void {
