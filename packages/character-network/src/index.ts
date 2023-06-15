@@ -86,11 +86,13 @@ class Network {
 
       if (update) {
         update.id = id;
-        this.clients.get(id)!.update = update;
+        if (this.clients.get(id) !== undefined) {
+          this.clients.get(id)!.update = update;
 
-        for (const { socket: otherSocket } of this.clients.values()) {
-          if (otherSocket !== socket && otherSocket.readyState === WebSocket.OPEN) {
-            otherSocket.send(message);
+          for (const { socket: otherSocket } of this.clients.values()) {
+            if (otherSocket !== socket && otherSocket.readyState === WebSocket.OPEN) {
+              otherSocket.send(message);
+            }
           }
         }
       }
