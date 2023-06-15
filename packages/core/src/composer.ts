@@ -86,7 +86,7 @@ export class Composer {
     this.bloomPass.radius = 0.3;
     this.bloomPass.threshold = 0.6;
 
-    this.bcsvhPass.uniforms.brightness!.value = 0.05;
+    this.bcsvhPass.uniforms.brightness!.value = 0.04;
     this.bcsvhPass.uniforms.contrast!.value = 1.2;
     this.bcsvhPass.uniforms.saturation!.value = 0.9;
     this.bcsvhPass.uniforms.vibrance!.value = 1.0;
