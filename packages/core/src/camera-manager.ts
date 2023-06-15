@@ -72,7 +72,7 @@ export class CameraManager {
     const scrollAmount = event.deltaY * 0.01;
     this.targetDistance += scrollAmount;
     this.targetDistance = Math.max(0, this.targetDistance);
-    this.targetDistance = Math.min(this.targetDistance, this.maxTargetDistance)
+    this.targetDistance = Math.min(this.targetDistance, this.maxTargetDistance);
   }
 
   onPointerLockChange(): void {
@@ -117,8 +117,8 @@ export class CameraManager {
       this.targetTheta !== null
     ) {
       this.distance += ease(this.targetDistance, this.distance, 0.02);
-      this.phi += ease(this.targetPhi, this.phi, 0.06);
-      this.theta += ease(this.targetTheta, this.theta, 0.06);
+      this.phi += ease(this.targetPhi, this.phi, 0.07);
+      this.theta += ease(this.targetTheta, this.theta, 0.07);
 
       const x = this.target.x + this.distance * Math.sin(this.phi) * Math.cos(this.theta);
       const y = this.target.y + this.distance * Math.cos(this.phi);
