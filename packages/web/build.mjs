@@ -2,12 +2,6 @@ import esbuild from "esbuild";
 import { copy } from "esbuild-plugin-copy";
 import { htmlPlugin } from "@craftamap/esbuild-plugin-html";
 
-// Make all environment variables available during build
-const environmentDefinitions = {};
-for (const k in process.env) {
-  environmentDefinitions[`process.env.${k}`] = JSON.stringify(process.env[k]);
-}
-
 const config = {
   entryPoints: ["src/index.ts"],
   entryNames: "[dir]/[name]-[hash]",
@@ -43,7 +37,6 @@ const config = {
       ],
     }),
   ],
-  define: environmentDefinitions,
 };
 
 // Serve build, watch for changes and live reload

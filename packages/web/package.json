@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "iterate": "npm run build -- --serve --watch",
-    "build": "rimraf ./dist && env-cmd --silent node build.mjs",
+    "build": "rimraf ./dist && node build.mjs",
     "type-check": "tsc --noEmit",
     "lint": "eslint \"./src/**/*.{ts,tsx}\" --max-warnings 0",
     "lint:fix": "eslint \"./src/**/*.{ts,tsx}\" --fix"
