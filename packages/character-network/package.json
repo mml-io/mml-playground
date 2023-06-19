@@ -10,7 +10,7 @@
   ],
   "type": "commonjs",
   "scripts": {
-    "build": "rimraf ./dist; node ./build.js --build",
+    "build": "rimraf ./dist && node ./build.js --build",
     "iterate": "node ./build.js --watch",
     "type-check": "tsc --noEmit",
     "lint": "eslint \"./src/**/*.{ts,}\" --max-warnings 0",
