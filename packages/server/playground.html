@@ -233,8 +233,11 @@
         }
 
         updateLabels(value) {
-          for (const labelElem of this.documentLabelElems) {
-            labelElem.setAttribute("content", value);
+          if (this.labelValue !== value) {
+            this.labelValue = value;
+            for (const labelElem of this.documentLabelElems) {
+              labelElem.setAttribute("content", value);
+            }
           }
         }
 
