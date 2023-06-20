@@ -79,7 +79,7 @@ export class Character {
     );
     this.head.position.set(
       model.position.x,
-      model.position.y + this.boundingSize.y * 0.85,
+      model.position.y + (this.boundingSize.y > 1.0 ? this.boundingSize.y * 0.85 : 1.7),
       model.position.z,
     );
     if (this.debug === false) this.head.visible = false;
@@ -127,8 +127,10 @@ export class Character {
         (object: Object3D) => {
           this.model = object as Object3D;
           this.preprocessModel(this.model);
+          this.model.scale.x = this.model.scale.y = this.model.scale.z = 0.01;
           this.model.name = this.name as string;
           this.modelContent.name = this.model.name;
+          this.applyMaterialToAllSkinnedMeshes(this.materialManager.standardMaterial);
           this.modelLoadedCallback();
         },
         undefined,

@@ -92,7 +92,7 @@ export class BasicCharacterController {
         undefined,
         (error) => console.error(`Error loading ${animationFile}: ${error}`),
       );
-    } else if (["gltf", "glb"].includes(extension)) {
+    } else if (extension === "fbx") {
       this.fbxLoader.load(animationFile, (anim) => {
         const animation = anim.animations[0] as AnimationClip;
         this.animations[animationType] = this.animationMixer.clipAction(animation);
