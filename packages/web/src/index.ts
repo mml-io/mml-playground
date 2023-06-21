@@ -70,6 +70,7 @@ export class App {
       idleAnimationFileUrl: `${this.modelsPath}/unreal_idle.glb`,
       jogAnimationFileUrl: `${this.modelsPath}/unreal_jog.glb`,
       sprintAnimationFileUrl: `${this.modelsPath}/unreal_run.glb`,
+      modelScale: 1.0,
     };
 
     this.init = this.init.bind(this);
