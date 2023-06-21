@@ -127,7 +127,7 @@ export class CharacterManager {
         }
       }
 
-      if (runTime.frame % 30 === 0 && this.camera) {
+      if (runTime.frame % 60 === 0 && this.camera) {
         if (this.positionedFromUrl === false) {
           this.transformProbe.decodeCharacterAndCamera(this.character.model, cameraManager);
           this.positionedFromUrl = true;
