@@ -1,21 +1,22 @@
 import { Group, PerspectiveCamera } from "three";
 
-import { BasicCharacterController } from "./basic-character-controller";
-import { CameraManager } from "./camera-manager";
+import { CameraManager } from "../camera-manager";
+import { Composer } from "../composer";
+import { InputManager } from "../input-manager";
+import { RunTime } from "../run-time-controller";
+import { getSpawnPositionInsideCircle } from "../utils/helpers/math-helpers";
+import { Network } from "../utils/network/network";
+
 import { Character, CharacterDescription } from "./character";
 import { CharacterTransformProbe } from "./character-transform-probe";
-import { Composer } from "./composer";
-import { InputManager } from "./input-manager";
-import { RemoteCharacterController } from "./remote-character-controller";
-import { RunTime } from "./run-time-controller";
-import { getSpawnPositionInsideCircle } from "./utils/helpers/math-helpers";
-import { Network } from "./utils/network/network";
+import { LocalController } from "./controller-local";
+import { RemoteController } from "./controller-remote";
 
 export class CharacterManager {
   public loadingCharacters: Map<number, Promise<Character>> = new Map();
 
   public remoteCharacters: Map<number, Character> = new Map();
-  public remoteCharacterControllers: Map<number, RemoteCharacterController> = new Map();
+  public remoteCharacterControllers: Map<number, RemoteController> = new Map();
 
   private characterDescription: CharacterDescription | null = null;
   public character: Character | null = null;
@@ -32,50 +33,26 @@ export class CharacterManager {
   ) {
     this.characterDescription = characterDescription;
     const characterLoadingPromise = new Promise<Character>((resolve) => {
-      const character = new Character(
-        characterDescription.meshFileUrl,
-        characterDescription.modelScale,
-        id,
-        () => {
-          const spawnPosition = getSpawnPositionInsideCircle(7, 30, id);
-          character.model.position.set(spawnPosition.x, spawnPosition.y + 0.04, spawnPosition.z);
+      const character = new Character(characterDescription, id, isLocal, () => {
+        const spawnPosition = getSpawnPositionInsideCircle(7, 30, id);
+        character.model.position.set(spawnPosition.x, spawnPosition.y + 0.04, spawnPosition.z);
 
-          character.hideMaterialByMeshName("SK_UE5Mannequin_1");
-          group.add(character.model);
+        character.hideMaterialByMeshName("SK_UE5Mannequin_1");
+        group.add(character.model);
 
-          if (isLocal) {
-            this.character = character;
-            this.character.controller = new BasicCharacterController(this.character.model, id);
-            this.character.controller.setAnimationFromFile(
-              "idle",
-              characterDescription.idleAnimationFileUrl,
-            );
-            this.character.controller.setAnimationFromFile(
-              "walk",
-              characterDescription.jogAnimationFileUrl,
-            );
-            this.character.controller.setAnimationFromFile(
-              "run",
-              characterDescription.sprintAnimationFileUrl,
-            );
-          } else {
-            this.remoteCharacters.set(id, character);
-            const remoteController = new RemoteCharacterController(character, id);
-            remoteController.setAnimationFromFile(
-              "idle",
-              characterDescription.idleAnimationFileUrl,
-            );
-            remoteController.setAnimationFromFile("walk", characterDescription.jogAnimationFileUrl);
-            remoteController.setAnimationFromFile(
-              "run",
-              characterDescription.sprintAnimationFileUrl,
-            );
-            this.remoteCharacterControllers.set(id, remoteController);
-          }
+        if (isLocal) {
+          this.character = character;
+        } else {
+          this.remoteCharacters.set(id, character);
+          const remoteController = new RemoteController(character, id);
+          remoteController.setAnimationFromFile("idle", characterDescription.idleAnimationFileUrl);
+          remoteController.setAnimationFromFile("walk", characterDescription.jogAnimationFileUrl);
+          remoteController.setAnimationFromFile("run", characterDescription.sprintAnimationFileUrl);
+          this.remoteCharacterControllers.set(id, remoteController);
+        }
 
-          resolve(character);
-        },
-      );
+        resolve(character);
+      });
     });
 
     this.loadingCharacters.set(id, characterLoadingPromise);
@@ -127,7 +104,7 @@ export class CharacterManager {
         }
       }
 
-      if (runTime.frame % 30 === 0 && this.camera) {
+      if (runTime.frame % 60 === 0 && this.camera) {
         if (this.positionedFromUrl === false) {
           this.transformProbe.decodeCharacterAndCamera(this.character.model, cameraManager);
           this.positionedFromUrl = true;

@@ -1,8 +1,8 @@
-export { BasicCharacterController } from "./basic-character-controller";
-export { RemoteCharacterController } from "./remote-character-controller";
+export { LocalController } from "./character/controller-local";
+export { RemoteController } from "./character/controller-remote";
 export { CameraManager } from "./camera-manager";
-export { type CharacterDescription, Character } from "./character";
-export { CharacterManager } from "./character-manager";
+export { type CharacterDescription, Character } from "./character/character";
+export { CharacterManager } from "./character/character-manager";
 export { Composer } from "./composer";
 export { InputManager } from "./input-manager";
 export { MaterialManager } from "./material-manager";
