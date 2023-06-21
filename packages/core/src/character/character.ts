@@ -1,8 +1,10 @@
 import {
+  AnimationAction,
+  AnimationClip,
+  AnimationMixer,
   Box3,
   BoxHelper,
   Color,
-  LoadingManager,
   Mesh,
   MeshStandardMaterial,
   Object3D,
@@ -10,12 +12,12 @@ import {
   Vector2,
   Vector3,
 } from "three";
-import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
-import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
-import { BasicCharacterController } from "./basic-character-controller";
-import { MaterialManager } from "./material-manager";
-import { RunTime } from "./run-time-controller";
+import { MaterialManager } from "../material-manager";
+import { RunTime } from "../run-time-controller";
+
+import { LocalController } from "./controller-local";
+import { ModelLoader } from "./model-loader";
 
 export type CharacterDescription = {
   meshFileUrl: string;
@@ -25,16 +27,18 @@ export type CharacterDescription = {
   modelScale: number;
 };
 
+export type AnimationTypes = "idle" | "walk" | "run";
+
 export class Character {
   public debug = false;
+
+  private modelLoader: ModelLoader = new ModelLoader();
+
+  private characterDescription: CharacterDescription;
 
   private debugHelper: BoxHelper | null = null;
   private boundingBox: Box3 | null = null;
   private boundingSize: Vector3 | null = null;
-
-  private loadingManager: LoadingManager;
-  private fbxLoader: FBXLoader;
-  private gltfLoader: GLTFLoader;
 
   private modelUrl: string;
   private modelLoadedCallback: () => void;
@@ -44,8 +48,9 @@ export class Character {
 
   private materialManager: MaterialManager = new MaterialManager();
 
-  public controller: BasicCharacterController | null = null;
+  public controller: LocalController | null = null;
 
+  public isLocal: boolean;
   public id: number = 0;
   public name: string | null = null;
 
@@ -57,15 +62,22 @@ export class Character {
 
   public color: Color = new Color();
 
-  constructor(modelUrl: string, modelScale: number, id: number, modelLoadedCallback: () => void) {
+  public animationMixer: AnimationMixer | null = null;
+  public animations: Record<string, AnimationAction> = {};
+
+  constructor(
+    characterDescription: CharacterDescription,
+    id: number,
+    isLocal: boolean,
+    modelLoadedCallback: () => void,
+  ) {
+    this.isLocal = isLocal;
     this.id = id;
-    this.modelUrl = modelUrl;
-    this.modelScale = modelScale;
+    this.characterDescription = characterDescription;
+    this.modelUrl = this.characterDescription.meshFileUrl;
+    this.modelScale = this.characterDescription.modelScale;
     this.modelLoadedCallback = modelLoadedCallback;
 
-    this.loadingManager = new LoadingManager();
-    this.fbxLoader = new FBXLoader(this.loadingManager);
-    this.gltfLoader = new GLTFLoader(this.loadingManager);
     this.color = this.materialManager.colorsCube216[id];
     this.load();
   }
@@ -103,6 +115,26 @@ export class Character {
     });
   }
 
+  async setAnimationFromFile(
+    animationFileUrl: string,
+    animationType: AnimationTypes,
+  ): Promise<void> {
+    return new Promise(async (resolve, reject) => {
+      if (this.animationMixer === null) {
+        this.animationMixer = new AnimationMixer(this.model);
+      }
+      const animation = await this.modelLoader.load(animationFileUrl, "animation");
+      if (typeof animation !== "undefined" && animation instanceof AnimationClip) {
+        this.animations[animationType] = this.animationMixer.clipAction(animation);
+        this.animations[animationType].stop();
+        if (animationType === "idle") this.animations[animationType].play();
+        resolve();
+      } else {
+        reject();
+      }
+    });
+  }
+
   async load(): Promise<void> {
     this.extension = this.modelUrl.split(".").pop()!;
     this.name = this.modelUrl.split("/").pop()!.replace(`.${this.extension!}`, "");
@@ -110,40 +142,26 @@ export class Character {
       console.error(`Error: unrecognized model type at ${this.modelUrl}`);
       return;
     }
-    if (["gltf", "glb"].includes(this.extension)) {
-      this.gltfLoader.load(
-        this.modelUrl,
-        (object: GLTF) => {
-          this.model = object.scene as Object3D;
-          this.preprocessModel(this.model);
-          this.model.scale.x = this.model.scale.y = this.model.scale.z = this.modelScale;
-          this.model.name = this.name as string;
-          this.model.animations = object.animations;
-          this.modelContent.name = this.model.name;
-          this.applyMaterialToAllSkinnedMeshes(this.materialManager.standardMaterial);
-          this.modelLoadedCallback();
-        },
-        undefined,
-        (error) => console.log(`Error loading ${this.modelUrl}: ${error}`),
-      );
-    } else if (this.extension === "fbx") {
-      this.fbxLoader.load(
-        this.modelUrl,
-        (object: Object3D) => {
-          this.model = object as Object3D;
-          this.preprocessModel(this.model);
-          this.model.scale.x = this.model.scale.y = this.model.scale.z = this.modelScale;
-          this.model.name = this.name as string;
-          this.modelContent.name = this.model.name;
-          this.applyMaterialToAllSkinnedMeshes(this.materialManager.standardMaterial);
-          this.modelLoadedCallback();
-        },
-        undefined,
-        (error) => console.log(`Error loading ${this.modelUrl}: ${error}`),
-      );
-    } else {
-      console.error(`Error: unrecognized extension type at ${this.modelUrl}`);
-      return;
+    const model = await this.modelLoader.load(this.modelUrl, "model");
+    if (typeof model !== "undefined") {
+      this.model = model as Object3D;
+      this.preprocessModel(this.model);
+      this.model.scale.x = this.model.scale.y = this.model.scale.z = this.modelScale;
+      this.model.name = this.name as string;
+      this.modelContent.name = this.model.name;
+      this.applyMaterialToAllSkinnedMeshes(this.materialManager.standardMaterial);
+      if (this.isLocal) {
+        await this.setAnimationFromFile(this.characterDescription.idleAnimationFileUrl, "idle");
+        await this.setAnimationFromFile(this.characterDescription.jogAnimationFileUrl, "walk");
+        await this.setAnimationFromFile(this.characterDescription.sprintAnimationFileUrl, "run");
+        this.controller = new LocalController(
+          this.model,
+          this.animations,
+          this.animationMixer!,
+          this.id,
+        );
+      }
+      this.modelLoadedCallback();
     }
   }
 

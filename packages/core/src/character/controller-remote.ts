@@ -10,13 +10,14 @@ import {
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
+import { RunTime } from "../run-time-controller";
+import { type AnimationState, type ClientUpdate } from "../utils/network/network";
+
 import { Character } from "./character";
-import { RunTime } from "./run-time-controller";
-import { type AnimationState, type ClientUpdate } from "./utils/network/network";
 
 export type AnimationTypes = "idle" | "walk" | "run";
 
-export class RemoteCharacterController {
+export class RemoteController {
   public id: number = 0;
   public currentAnimation: string = "idle";
 

@@ -1,8 +1,6 @@
 import {
   AnimationAction,
-  AnimationClip,
   AnimationMixer,
-  LoadingManager,
   LoopRepeat,
   Matrix4,
   Object3D,
@@ -11,30 +9,23 @@ import {
   Vector2,
   Vector3,
 } from "three";
-import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
-import { CameraManager } from "./camera-manager";
-import { InputManager } from "./input-manager";
-import { RunTime } from "./run-time-controller";
-import { anyTruthness } from "./utils/helpers/js-helpers";
-import { ease } from "./utils/helpers/math-helpers";
-import { type AnimationState, type ClientUpdate } from "./utils/network/network";
+import { CameraManager } from "../camera-manager";
+import { InputManager } from "../input-manager";
+import { RunTime } from "../run-time-controller";
+import { anyTruthness } from "../utils/helpers/js-helpers";
+import { ease } from "../utils/helpers/math-helpers";
+import { type AnimationState, type ClientUpdate } from "../utils/network/network";
 
 export type AnimationTypes = "idle" | "walk" | "run";
 
-export class BasicCharacterController {
+export class LocalController {
   public id: number = 0;
-  public currentAnimation: string = "idle";
+  public currentAnimation: string = "";
 
-  public character: Object3D | null = null;
-
-  private animationMixer: AnimationMixer = new AnimationMixer(new Object3D());
-  private animations: Record<string, AnimationAction> = {};
-  private loadManager: LoadingManager = new LoadingManager();
-
-  private fbxLoader: FBXLoader = new FBXLoader(this.loadManager);
-  private gltfLoader: GLTFLoader = new GLTFLoader(this.loadManager);
+  public characterModel: Object3D | null = null;
+  public animations: Record<string, AnimationAction>;
+  public animationMixer: AnimationMixer;
 
   private inputDirections: {
     forward: boolean;
@@ -67,38 +58,16 @@ export class BasicCharacterController {
     state: this.currentAnimation as AnimationState,
   };
 
-  constructor(characterModel: Object3D, id: number) {
+  constructor(
+    model: Object3D,
+    animations: Record<string, AnimationAction>,
+    animationMixer: AnimationMixer,
+    id: number,
+  ) {
     this.id = id;
-    this.character = characterModel;
-    this.animationMixer = new AnimationMixer(this.character);
-  }
-
-  setAnimationFromFile(animationType: AnimationTypes, fileName: string): void {
-    const animationFile = `${fileName}`;
-    const extension = fileName.split(".").pop();
-    if (typeof extension !== "string") {
-      console.error(`Error: could not recognize extension of animation: ${animationFile}`);
-      return;
-    }
-    if (["gltf", "glb"].includes(extension)) {
-      this.gltfLoader.load(
-        animationFile,
-        (anim) => {
-          const animation = anim.animations[0] as AnimationClip;
-          this.animations[animationType] = this.animationMixer.clipAction(animation);
-          this.animations[animationType].stop();
-          if (animationType === "idle") this.animations[animationType].play();
-        },
-        undefined,
-        (error) => console.error(`Error loading ${animationFile}: ${error}`),
-      );
-    } else if (extension === "fbx") {
-      this.fbxLoader.load(animationFile, (anim) => {
-        const animation = anim.animations[0] as AnimationClip;
-        this.animations[animationType] = this.animationMixer.clipAction(animation);
-        if (animationType === "idle") this.animations[animationType].play();
-      });
-    }
+    this.characterModel = model;
+    this.animations = animations;
+    this.animationMixer = animationMixer;
   }
 
   getTargetAnimation(): AnimationTypes {
@@ -112,6 +81,7 @@ export class BasicCharacterController {
   }
 
   transitionToAnimation(targetAnimation: string, transitionDuration: number = 0.21): void {
+    if (!this.characterModel) return;
     if (this.currentAnimation === targetAnimation) return;
 
     const currentAction = this.animations[this.currentAnimation];
@@ -161,20 +131,20 @@ export class BasicCharacterController {
   }
 
   updateRotation(): void {
-    if (!this.thirdPersonCamera || !this.character) return;
+    if (!this.thirdPersonCamera || !this.characterModel) return;
     const deltaTheta = Math.atan2(
-      this.thirdPersonCamera.position.x - this.character.position.x,
-      this.thirdPersonCamera.position.z - this.character.position.z,
+      this.thirdPersonCamera.position.x - this.characterModel.position.x,
+      this.thirdPersonCamera.position.z - this.characterModel.position.z,
     );
     const rotationQuaternion = new Quaternion();
     rotationQuaternion.setFromAxisAngle(this.rotationAngle, deltaTheta + this.getRotationOffset());
 
     this.currentRotationLerp += ease(this.targetRotationLerp, this.currentRotationLerp, 0.07);
-    this.character.quaternion.rotateTowards(rotationQuaternion, this.currentRotationLerp);
+    this.characterModel.quaternion.rotateTowards(rotationQuaternion, this.currentRotationLerp);
   }
 
   updatePosition(deltaTime: number): void {
-    if (!this.thirdPersonCamera || !this.character) return;
+    if (!this.thirdPersonCamera || !this.characterModel) return;
     const { forward, backward, left, right } = this.inputDirections;
 
     this.targetSpeed = this.runInput ? 14 : 8;
@@ -205,15 +175,18 @@ export class BasicCharacterController {
 
       moveDirection.y = 0;
       moveDirection.multiplyScalar(this.velocity * deltaTime);
-      this.character.position.add(moveDirection);
+      this.characterModel.position.add(moveDirection);
     } else {
       this.velocity = Math.max(this.velocity - 0.01 * deltaTime, 0);
     }
   }
 
   getNetworkState(): void {
-    const characterQuaternion = this.character?.getWorldQuaternion(new Quaternion());
-    const positionUpdate = new Vector2(this.character?.position.x, this.character?.position.z);
+    const characterQuaternion = this.characterModel?.getWorldQuaternion(new Quaternion());
+    const positionUpdate = new Vector2(
+      this.characterModel?.position.x,
+      this.characterModel?.position.z,
+    );
     const rotationUpdate = new Vector2(characterQuaternion?.y, characterQuaternion?.w);
     this.networkState = {
       id: this.id,
@@ -224,19 +197,19 @@ export class BasicCharacterController {
   }
 
   updateFromNetwork(clientUpdate: ClientUpdate): void {
-    if (!this.character || clientUpdate.id !== this.id) return;
+    if (!this.characterModel || clientUpdate.id !== this.id) return;
     const { location, rotation, state } = clientUpdate;
-    this.character.position.x = location.x;
-    this.character.position.z = location.y;
+    this.characterModel.position.x = location.x;
+    this.characterModel.position.z = location.y;
     const rotationQuaternion = new Quaternion(0, rotation.x, 0, rotation.y);
-    this.character.setRotationFromQuaternion(rotationQuaternion);
+    this.characterModel.setRotationFromQuaternion(rotationQuaternion);
     if (state !== this.currentAnimation) {
       this.transitionToAnimation(state);
     }
   }
 
   update(inputManager: InputManager, cameraManager: CameraManager, runTime: RunTime): void {
-    if (!this.character) return;
+    if (!this.characterModel || !this.animationMixer) return;
     if (!this.thirdPersonCamera) this.thirdPersonCamera = cameraManager.camera;
 
     const movementKeysPressed = inputManager.isMovementKeyPressed();

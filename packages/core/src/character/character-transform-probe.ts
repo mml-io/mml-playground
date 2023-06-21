@@ -1,6 +1,6 @@
 import { Object3D, PerspectiveCamera } from "three";
 
-import { CameraManager } from "./camera-manager";
+import { CameraManager } from "../camera-manager";
 
 export class CharacterTransformProbe {
   encodeCharacterAndCamera = (character: Object3D, camera: PerspectiveCamera): void => {
