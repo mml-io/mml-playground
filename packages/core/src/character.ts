@@ -22,6 +22,7 @@ export type CharacterDescription = {
   idleAnimationFileUrl: string;
   jogAnimationFileUrl: string;
   sprintAnimationFileUrl: string;
+  modelScale: number;
 };
 
 export class Character {
@@ -47,16 +48,19 @@ export class Character {
 
   public id: number = 0;
   public name: string | null = null;
+
   public model: Object3D;
+  public modelScale: number;
   public head: Object3D | null = null;
   public position: Vector3 = new Vector3();
   public headPosition: Vector3 = new Vector3();
 
   public color: Color = new Color();
 
-  constructor(modelUrl: string, id: number, modelLoadedCallback: () => void) {
+  constructor(modelUrl: string, modelScale: number, id: number, modelLoadedCallback: () => void) {
     this.id = id;
     this.modelUrl = modelUrl;
+    this.modelScale = modelScale;
     this.modelLoadedCallback = modelLoadedCallback;
 
     this.loadingManager = new LoadingManager();
@@ -79,7 +83,7 @@ export class Character {
     );
     this.head.position.set(
       model.position.x,
-      model.position.y + this.boundingSize.y * 0.85,
+      model.position.y + (this.boundingSize.y > 1.0 ? this.boundingSize.y * 0.85 : 1.7),
       model.position.z,
     );
     if (this.debug === false) this.head.visible = false;
@@ -112,6 +116,7 @@ export class Character {
         (object: GLTF) => {
           this.model = object.scene as Object3D;
           this.preprocessModel(this.model);
+          this.model.scale.x = this.model.scale.y = this.model.scale.z = this.modelScale;
           this.model.name = this.name as string;
           this.model.animations = object.animations;
           this.modelContent.name = this.model.name;
@@ -127,8 +132,10 @@ export class Character {
         (object: Object3D) => {
           this.model = object as Object3D;
           this.preprocessModel(this.model);
+          this.model.scale.x = this.model.scale.y = this.model.scale.z = this.modelScale;
           this.model.name = this.name as string;
           this.modelContent.name = this.model.name;
+          this.applyMaterialToAllSkinnedMeshes(this.materialManager.standardMaterial);
           this.modelLoadedCallback();
         },
         undefined,

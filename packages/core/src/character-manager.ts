@@ -32,39 +32,50 @@ export class CharacterManager {
   ) {
     this.characterDescription = characterDescription;
     const characterLoadingPromise = new Promise<Character>((resolve) => {
-      const character = new Character(characterDescription.meshFileUrl, id, () => {
-        const spawnPosition = getSpawnPositionInsideCircle(7, 30, id);
-        character.model.position.set(spawnPosition.x, spawnPosition.y + 0.04, spawnPosition.z);
+      const character = new Character(
+        characterDescription.meshFileUrl,
+        characterDescription.modelScale,
+        id,
+        () => {
+          const spawnPosition = getSpawnPositionInsideCircle(7, 30, id);
+          character.model.position.set(spawnPosition.x, spawnPosition.y + 0.04, spawnPosition.z);
 
-        character.hideMaterialByMeshName("SK_UE5Mannequin_1");
-        group.add(character.model);
+          character.hideMaterialByMeshName("SK_UE5Mannequin_1");
+          group.add(character.model);
 
-        if (isLocal) {
-          this.character = character;
-          this.character.controller = new BasicCharacterController(this.character.model, id);
-          this.character.controller.setAnimationFromFile(
-            "idle",
-            characterDescription.idleAnimationFileUrl,
-          );
-          this.character.controller.setAnimationFromFile(
-            "walk",
-            characterDescription.jogAnimationFileUrl,
-          );
-          this.character.controller.setAnimationFromFile(
-            "run",
-            characterDescription.sprintAnimationFileUrl,
-          );
-        } else {
-          this.remoteCharacters.set(id, character);
-          const remoteController = new RemoteCharacterController(character, id);
-          remoteController.setAnimationFromFile("idle", characterDescription.idleAnimationFileUrl);
-          remoteController.setAnimationFromFile("walk", characterDescription.jogAnimationFileUrl);
-          remoteController.setAnimationFromFile("run", characterDescription.sprintAnimationFileUrl);
-          this.remoteCharacterControllers.set(id, remoteController);
-        }
+          if (isLocal) {
+            this.character = character;
+            this.character.controller = new BasicCharacterController(this.character.model, id);
+            this.character.controller.setAnimationFromFile(
+              "idle",
+              characterDescription.idleAnimationFileUrl,
+            );
+            this.character.controller.setAnimationFromFile(
+              "walk",
+              characterDescription.jogAnimationFileUrl,
+            );
+            this.character.controller.setAnimationFromFile(
+              "run",
+              characterDescription.sprintAnimationFileUrl,
+            );
+          } else {
+            this.remoteCharacters.set(id, character);
+            const remoteController = new RemoteCharacterController(character, id);
+            remoteController.setAnimationFromFile(
+              "idle",
+              characterDescription.idleAnimationFileUrl,
+            );
+            remoteController.setAnimationFromFile("walk", characterDescription.jogAnimationFileUrl);
+            remoteController.setAnimationFromFile(
+              "run",
+              characterDescription.sprintAnimationFileUrl,
+            );
+            this.remoteCharacterControllers.set(id, remoteController);
+          }
 
-        resolve(character);
-      });
+          resolve(character);
+        },
+      );
     });
 
     this.loadingCharacters.set(id, characterLoadingPromise);
