@@ -35,13 +35,15 @@ const playgroundDocument = new EditableNetworkedDOM(
 );
 
 const updateExamplesHostUrl = (req: Request) => {
-  examplesHostUrl = `${req.secure ? "wss" : "ws"}://${
-    req.headers["x-forwarded-host"]
-      ? `${req.headers["x-forwarded-host"]}:${req.headers["x-forwarded-port"]}`
-      : req.headers.host
-  }${EXAMPLE_DOCUMENTS_SOCKET_PATH}`;
+  if (!examplesHostUrl) {
+    examplesHostUrl = `${req.secure ? "wss" : "ws"}://${
+      req.headers["x-forwarded-host"]
+        ? `${req.headers["x-forwarded-host"]}:${req.headers["x-forwarded-port"]}`
+        : req.headers.host
+    }${EXAMPLE_DOCUMENTS_SOCKET_PATH}`;
 
-  playgroundDocument.load(getMmlDocumentContent(PLAYGROUND_DOCUMENT_PATH));
+    playgroundDocument.load(getMmlDocumentContent(PLAYGROUND_DOCUMENT_PATH));
+  }
 };
 
 playgroundDocument.load(getMmlDocumentContent(PLAYGROUND_DOCUMENT_PATH));
