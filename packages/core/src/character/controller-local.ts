@@ -10,12 +10,12 @@ import {
   Vector3,
 } from "three";
 
-import { CameraManager } from "../camera-manager";
-import { InputManager } from "../input-manager";
-import { RunTime } from "../run-time-controller";
-import { anyTruthness } from "../utils/helpers/js-helpers";
-import { ease } from "../utils/helpers/math-helpers";
-import { type AnimationState, type ClientUpdate } from "../utils/network/network";
+import { CameraManager } from "../camera/camera-manager";
+import { InputManager } from "../input/input-manager";
+import { type AnimationState, type ClientUpdate } from "../network";
+import { RunTimeManager } from "../runtime/runtime-manager";
+import { anyTruthness } from "../utils/js-helpers";
+import { ease } from "../utils/math-helpers";
 
 export type AnimationTypes = "idle" | "walk" | "run";
 
@@ -53,7 +53,7 @@ export class LocalController {
 
   public networkState: ClientUpdate = {
     id: 0,
-    location: new Vector2(),
+    location: new Vector3(),
     rotation: new Vector2(),
     state: this.currentAnimation as AnimationState,
   };
@@ -183,8 +183,9 @@ export class LocalController {
 
   getNetworkState(): void {
     const characterQuaternion = this.characterModel?.getWorldQuaternion(new Quaternion());
-    const positionUpdate = new Vector2(
+    const positionUpdate = new Vector3(
       this.characterModel?.position.x,
+      this.characterModel?.position.y,
       this.characterModel?.position.z,
     );
     const rotationUpdate = new Vector2(characterQuaternion?.y, characterQuaternion?.w);
@@ -200,7 +201,8 @@ export class LocalController {
     if (!this.characterModel || clientUpdate.id !== this.id) return;
     const { location, rotation, state } = clientUpdate;
     this.characterModel.position.x = location.x;
-    this.characterModel.position.z = location.y;
+    this.characterModel.position.y = location.y;
+    this.characterModel.position.z = location.z;
     const rotationQuaternion = new Quaternion(0, rotation.x, 0, rotation.y);
     this.characterModel.setRotationFromQuaternion(rotationQuaternion);
     if (state !== this.currentAnimation) {
@@ -208,7 +210,7 @@ export class LocalController {
     }
   }
 
-  update(inputManager: InputManager, cameraManager: CameraManager, runTime: RunTime): void {
+  update(inputManager: InputManager, cameraManager: CameraManager, runTime: RunTimeManager): void {
     if (!this.characterModel || !this.animationMixer) return;
     if (!this.thirdPersonCamera) this.thirdPersonCamera = cameraManager.camera;
 

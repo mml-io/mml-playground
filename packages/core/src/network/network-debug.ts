@@ -38,9 +38,9 @@ export function networkDebugOverlay(clientUpdates: Map<number, ClientUpdate>): v
     tableHTML += `
       <tr>
         <td class="id">${id}</td>
-        <td class="location">x: ${formatNumber(location.x)}, y: 0, z: ${formatNumber(
+        <td class="location">x: ${formatNumber(location.x)}, y: ${formatNumber(
       location.y,
-    )}</td>
+    )}, z: ${formatNumber(location.z)}</td>
         <td class="rotation">x: 0, y: ${formatNumber(rotation.x)}, z: 0, w: ${formatNumber(
       rotation.y,
     )}</td>

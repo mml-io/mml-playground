@@ -8,7 +8,7 @@ import {
   WebGLRenderer,
 } from "three";
 
-import { ease } from "./utils/helpers/math-helpers";
+import { ease } from "../utils/math-helpers";
 
 export class CameraManager {
   camera: PerspectiveCamera;

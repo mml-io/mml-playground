@@ -7,13 +7,13 @@ import {
   WebGLRenderer,
 } from "three";
 
-import EffectComposer from "./utils/webgl/postprocessing/helpers/effect-composer";
-import RenderPass from "./utils/webgl/postprocessing/helpers/render-pass";
-import ShaderPass from "./utils/webgl/postprocessing/helpers/shader-pass";
-import BCSVHShader from "./utils/webgl/postprocessing/shaders/bcsvh-shader";
-import FXAAShader from "./utils/webgl/postprocessing/shaders/fxaa-shader";
-import GaussGrainShader from "./utils/webgl/postprocessing/shaders/gauss-grain-shader";
-import UnrealBloomPass from "./utils/webgl/postprocessing/unreal-bloom-pass";
+import EffectComposer from "../utils/webgl/postprocessing/helpers/effect-composer";
+import RenderPass from "../utils/webgl/postprocessing/helpers/render-pass";
+import ShaderPass from "../utils/webgl/postprocessing/helpers/shader-pass";
+import BCSVHShader from "../utils/webgl/postprocessing/shaders/bcsvh-shader";
+import FXAAShader from "../utils/webgl/postprocessing/shaders/fxaa-shader";
+import GaussGrainShader from "../utils/webgl/postprocessing/shaders/gauss-grain-shader";
+import UnrealBloomPass from "../utils/webgl/postprocessing/unreal-bloom-pass";
 
 export class Composer {
   private width: number = window.innerWidth;

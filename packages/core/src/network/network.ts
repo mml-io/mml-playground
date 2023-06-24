@@ -1,10 +1,10 @@
-import { Vector2 } from "three";
+import { Vector2, Vector3 } from "three";
 
 export type AnimationState = "idle" | "walk" | "run";
 
 export type ClientUpdate = {
   id: number;
-  location: Vector2;
+  location: Vector3;
   rotation: Vector2;
   state: AnimationState;
 };
@@ -117,14 +117,15 @@ export class Network {
   }
 
   encodeUpdate(update: ClientUpdate): ArrayBuffer {
-    const buffer = new ArrayBuffer(15);
+    const buffer = new ArrayBuffer(19);
     const dataView = new DataView(buffer);
     dataView.setUint16(0, update.id); // id
     dataView.setFloat32(2, update.location.x); // position.x
-    dataView.setFloat32(6, update.location.y); // position.z
-    dataView.setInt16(10, update.rotation.x * 32767); // quaternion.y
-    dataView.setInt16(12, update.rotation.y * 32767); // quaternion.w
-    dataView.setUint8(14, this.animationStateToByte(update.state)); // animationState
+    dataView.setFloat32(6, update.location.y); // position.x
+    dataView.setFloat32(10, update.location.z); // position.z
+    dataView.setInt16(14, update.rotation.x * 32767); // quaternion.y
+    dataView.setInt16(16, update.rotation.y * 32767); // quaternion.w
+    dataView.setUint8(18, this.animationStateToByte(update.state)); // animationState
     return buffer;
   }
 
@@ -132,11 +133,12 @@ export class Network {
     const dataView = new DataView(buffer);
     const id = dataView.getUint16(0); // id
     const x = dataView.getFloat32(2); // position.x
-    const z = dataView.getFloat32(6); // position.z
-    const quaternionY = dataView.getInt16(10) / 32767; // quaternion.y
-    const quaternionW = dataView.getInt16(12) / 32767; // quaternion.w
-    const state = this.byteToAnimationState(dataView.getUint8(14)); // animationState
-    const location = new Vector2(x, z);
+    const y = dataView.getFloat32(6); // position.y
+    const z = dataView.getFloat32(10); // position.z
+    const quaternionY = dataView.getInt16(14) / 32767; // quaternion.y
+    const quaternionW = dataView.getInt16(16) / 32767; // quaternion.w
+    const state = this.byteToAnimationState(dataView.getUint8(18)); // animationState
+    const location = new Vector3(x, y, z);
     const rotation = new Vector2(quaternionY, quaternionW);
     return { id, location, rotation, state };
   }
@@ -146,7 +148,6 @@ export class Network {
       console.log("Not connected to the server");
       return;
     }
-
     const encodedUpdate = this.encodeUpdate(update);
     this.connection.ws?.send(encodedUpdate);
   }

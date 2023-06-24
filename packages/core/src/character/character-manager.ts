@@ -1,15 +1,13 @@
 import { Group, PerspectiveCamera } from "three";
 
-import { CameraManager } from "../camera-manager";
-import { Composer } from "../composer";
-import { InputManager } from "../input-manager";
-import { RunTime } from "../run-time-controller";
-import { getSpawnPositionInsideCircle } from "../utils/helpers/math-helpers";
-import { Network } from "../utils/network/network";
+import { CameraManager } from "../camera/camera-manager";
+import { InputManager } from "../input/input-manager";
+import { Network } from "../network/network";
+import { RunTimeManager } from "../runtime/runtime-manager";
+import { getSpawnPositionInsideCircle } from "../utils/math-helpers";
 
 import { Character, CharacterDescription } from "./character";
 import { CharacterTransformProbe } from "./character-transform-probe";
-import { LocalController } from "./controller-local";
 import { RemoteController } from "./controller-remote";
 
 export class CharacterManager {
@@ -60,15 +58,14 @@ export class CharacterManager {
   }
 
   update(
-    runTime: RunTime,
+    runTime: RunTimeManager,
     inputManager: InputManager,
     cameraManager: CameraManager,
-    composer: Composer,
     network: Network,
     group: Group,
   ) {
     if (this.character) {
-      this.character.update(runTime, composer.resolution);
+      this.character.update(runTime.time);
       if (this.camera === null) this.camera = cameraManager.camera;
       if (this.transformProbe === null) {
         this.transformProbe = new CharacterTransformProbe();
@@ -78,7 +75,6 @@ export class CharacterManager {
       if (this.character.controller) {
         this.character.controller.update(inputManager, cameraManager, runTime);
       }
-
       if (network.connected && runTime.frame % 2 === 0) {
         network.sendUpdate(this.character.controller!.networkState);
       }
@@ -92,7 +88,7 @@ export class CharacterManager {
 
         const characterController = this.remoteCharacterControllers.get(id);
         if (characterController) {
-          characterController.update(update, runTime, composer.resolution);
+          characterController.update(update, runTime.time, runTime.smoothDeltaTime);
         }
       }
 

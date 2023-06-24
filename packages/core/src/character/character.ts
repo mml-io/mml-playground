@@ -9,12 +9,10 @@ import {
   MeshStandardMaterial,
   Object3D,
   SphereGeometry,
-  Vector2,
   Vector3,
 } from "three";
 
-import { MaterialManager } from "../material-manager";
-import { RunTime } from "../run-time-controller";
+import { MaterialManager } from "../materials/material-manager";
 
 import { LocalController } from "./controller-local";
 import { ModelLoader } from "./model-loader";
@@ -44,7 +42,6 @@ export class Character {
   private modelLoadedCallback: () => void;
 
   private extension: string | null = null;
-  private modelContent: Record<string, number | string> = {};
 
   private materialManager: MaterialManager = new MaterialManager();
 
@@ -105,13 +102,6 @@ export class Character {
         child.castShadow = true;
         child.receiveShadow = true;
       }
-      if (!(child.type in this.modelContent)) {
-        this.modelContent[child.type] = 1;
-      } else {
-        if (typeof this.modelContent[child.type] === "number") {
-          (this.modelContent[child.type] as number)++;
-        }
-      }
     });
   }
 
@@ -148,7 +138,6 @@ export class Character {
       this.preprocessModel(this.model);
       this.model.scale.x = this.model.scale.y = this.model.scale.z = this.modelScale;
       this.model.name = this.name as string;
-      this.modelContent.name = this.model.name;
       this.applyMaterialToAllSkinnedMeshes(this.materialManager.standardMaterial);
       if (this.isLocal) {
         await this.setAnimationFromFile(this.characterDescription.idleAnimationFileUrl, "idle");
@@ -201,11 +190,10 @@ export class Character {
     });
   }
 
-  update(runTime: RunTime, resolution: Vector2) {
+  update(time: number) {
     if (this.materialManager) {
       if (typeof this.materialManager.standardMaterialUniforms.time !== "undefined") {
-        this.materialManager.standardMaterialUniforms.time.value = runTime.time;
-        this.materialManager.standardMaterialUniforms.resolution.value = resolution;
+        this.materialManager.standardMaterialUniforms.time.value = time;
         this.materialManager.standardMaterialUniforms.diffuseRandomColor.value = this.color;
       }
     }

@@ -6,12 +6,12 @@ import {
   Object3D,
   Quaternion,
   Vector2,
+  Vector3,
 } from "three";
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
-import { RunTime } from "../run-time-controller";
-import { type AnimationState, type ClientUpdate } from "../utils/network/network";
+import { type AnimationState, type ClientUpdate } from "../network";
 
 import { Character } from "./character";
 
@@ -33,7 +33,7 @@ export class RemoteController {
 
   public networkState: ClientUpdate = {
     id: 0,
-    location: new Vector2(),
+    location: new Vector3(),
     rotation: new Vector2(),
     state: this.currentAnimation as AnimationState,
   };
@@ -106,7 +106,8 @@ export class RemoteController {
     if (!this.characterModel) return;
     const { location, rotation, state } = clientUpdate;
     this.characterModel.position.x = location.x;
-    this.characterModel.position.z = location.y;
+    this.characterModel.position.y = location.y;
+    this.characterModel.position.z = location.z;
     const rotationQuaternion = new Quaternion(0, rotation.x, 0, rotation.y);
     this.characterModel.setRotationFromQuaternion(rotationQuaternion);
     if (state !== this.currentAnimation) {
@@ -114,10 +115,10 @@ export class RemoteController {
     }
   }
 
-  update(clientUpdate: ClientUpdate, runTime: RunTime, resolution: Vector2): void {
+  update(clientUpdate: ClientUpdate, time: number, deltaTime: number): void {
     if (!this.character) return;
-    this.character.update(runTime, resolution);
+    this.character.update(time);
     this.updateFromNetwork(clientUpdate);
-    this.animationMixer.update(runTime.smoothDeltaTime);
+    this.animationMixer.update(deltaTime);
   }
 }
