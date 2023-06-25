@@ -13,13 +13,12 @@
     "lint": "eslint \"./src/**/*.{ts,tsx}\" --max-warnings 0",
     "lint:fix": "eslint \"./src/**/*.{ts,tsx}\" --fix"
   },
-  "devDependencies": {
-    "@craftamap/esbuild-plugin-html": "^0.5.0",
-    "@types/three": "^0.150.1"
-  },
   "dependencies": {
     "@mml-playground/core": "0.0.1",
-    "three": "^0.150.1",
-    "tweakpane": "^3.1.9"
+    "three": "^0.153.0"
+  },
+  "devDependencies": {
+    "@craftamap/esbuild-plugin-html": "^0.5.0",
+    "@types/three": "^0.152.1"
   }
 }

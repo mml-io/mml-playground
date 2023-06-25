@@ -17,14 +17,12 @@
     "lint:fix": "eslint \"./src/**/*.{ts,}\" --fix"
   },
   "dependencies": {
-    "three": "^0.150.1",
-    "uuid": "^9.0.0",
+    "three": "^0.153.0",
     "ws": "^8.13.0"
   },
   "devDependencies": {
     "@types/node": "^20.1.7",
-    "@types/three": "^0.150.1",
-    "@types/uuid": "^9.0.1",
+    "@types/three": "^0.152.1",
     "@types/ws": "^8.5.4",
     "ts-node": "^10.9.1",
     "tsc-watch": "^6.0.4"

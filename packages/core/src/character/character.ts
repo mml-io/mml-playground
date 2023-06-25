@@ -12,7 +12,7 @@ import {
   Vector3,
 } from "three";
 
-import { MaterialManager } from "../materials/material-manager";
+import { MaterialManager } from "../rendering/materials/material-manager";
 
 import { LocalController } from "./controller-local";
 import { ModelLoader } from "./model-loader";
