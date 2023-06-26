@@ -1,23 +1,20 @@
-import { Vector2 } from "three";
+import { ShaderMaterial, Uniform, Vector2 } from "three";
 
-import { type IGaussGrainShader } from "../../types";
+import { vertexShader } from "../shaders/vertex-shader";
 
-import vertexShader from "./vertex-shader";
-
-const GaussGrainShader: IGaussGrainShader = {
-  shaderID: "GaussGrainPass",
+export const GaussGrainEffect = new ShaderMaterial({
   uniforms: {
-    tDiffuse: { value: null },
-    resolution: { value: new Vector2() },
-    time: { value: 0 },
-    amount: { value: 0.04 },
-    alpha: { value: 0.0 },
+    tDiffuse: new Uniform(null),
+    resolution: new Uniform(new Vector2()),
+    time: new Uniform(0.0),
+    amount: new Uniform(0.0),
+    alpha: new Uniform(0.0),
   },
-  vertexShader,
-  fragmentShader: /* glsl */ `#version 300 es
+  vertexShader: vertexShader,
+  fragmentShader: /* glsl */ `
     precision highp float;
     in vec2 vUv;
-    out vec4 fragColor;
+
     uniform sampler2D tDiffuse;
     uniform vec2 resolution;
     uniform float time;
@@ -50,8 +47,7 @@ const GaussGrainShader: IGaussGrainShader = {
       vec4 originalColor = texture(tDiffuse, uv);
       vec3 grain = gaussgrain();
       vec3 col = originalColor.rgb + (grain * amount);
-      fragColor = vec4(clamp(col, 0.0, 1.0), alpha);
-    }`,
-};
-
-export default GaussGrainShader;
+      gl_FragColor = vec4(clamp(col, 0.0, 1.0), alpha);
+    }
+  `,
+});

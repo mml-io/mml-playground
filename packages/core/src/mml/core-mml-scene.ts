@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   IMMLScene,
   Interaction,
@@ -14,6 +13,7 @@ import {
 import { AudioListener, Group, PerspectiveCamera, Scene, Vector3, WebGLRenderer } from "three";
 
 export class CoreMMLScene {
+  private debug: boolean = false;
   private scene: THREE.Scene;
   private camera: THREE.Camera;
   private mmlScene: Partial<IMMLScene>;
@@ -22,7 +22,6 @@ export class CoreMMLScene {
   private interactionListener: InteractionListener;
   private elementsHolder: HTMLElement;
   private audioListener: AudioListener;
-
   private clickTrigger: MMLClickTrigger;
 
   constructor(
@@ -39,6 +38,10 @@ export class CoreMMLScene {
       location: camera.position,
       orientation: new Vector3(camera.rotation.x, camera.rotation.y, camera.rotation.z),
     };
+    this.promptManager = PromptManager.init(document.body);
+
+    const { interactionListener } = InteractionManager.init(document.body, this.camera, this.scene);
+    this.interactionListener = interactionListener;
 
     this.audioListener = new AudioListener();
 
@@ -67,6 +70,14 @@ export class CoreMMLScene {
         this.promptManager.prompt(promptProps, callback);
       },
     };
+    setGlobalMScene(this.mmlScene as IMMLScene);
+    registerCustomElementsToWindow(window);
+    this.clickTrigger = MMLClickTrigger.init(
+      document,
+      this.elementsHolder,
+      this.mmlScene as IMMLScene,
+    );
+    if (this.debug) console.log(this.clickTrigger);
   }
 
   onMouseDown() {
@@ -87,18 +98,5 @@ export class CoreMMLScene {
         childNode = childNode.nextSibling;
       }
     }
-  }
-
-  public init() {
-    setGlobalMScene(this.mmlScene as IMMLScene);
-    registerCustomElementsToWindow(window);
-    this.clickTrigger = MMLClickTrigger.init(
-      document,
-      this.elementsHolder,
-      this.mmlScene as IMMLScene,
-    );
-    this.promptManager = PromptManager.init(document.body);
-    const { interactionListener } = InteractionManager.init(document.body, this.camera, this.scene);
-    this.interactionListener = interactionListener;
   }
 }

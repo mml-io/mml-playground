@@ -12,8 +12,10 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "downlevelIteration": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "noEmit": true,
     "baseUrl": "."
   },
-  "include": ["./src/**/*.ts"]
+  "include": ["./src/**/*.ts*"]
 }

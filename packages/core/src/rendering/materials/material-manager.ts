@@ -1,8 +1,8 @@
-import { Color, CubeTexture, MeshPhysicalMaterial, UniformsUtils, Vector2 } from "three";
+import { Color, CubeTexture, MeshPhysicalMaterial, UniformsUtils } from "three";
 
-import { injectBefore, injectBeforeMain, injectInsideMain } from "./utils/webgl/shader-helpers";
-import { bayerDither } from "./utils/webgl/shaderchunks/bayer-dither";
-import { TUniforms } from "./utils/webgl/types";
+import { injectBefore, injectBeforeMain, injectInsideMain } from "../../utils/webgl/shader-helpers";
+import { bayerDither } from "../../utils/webgl/shaderchunks/bayer-dither";
+import { TUniforms } from "../../utils/webgl/types";
 
 export class MaterialManager {
   public standardMaterial: MeshPhysicalMaterial;
@@ -15,9 +15,9 @@ export class MaterialManager {
   constructor() {
     this.standardMaterial = new MeshPhysicalMaterial({
       color: 0xffffff,
-      transmission: 0.2,
-      metalness: 0.0,
-      roughness: 0.5,
+      transmission: 0.5,
+      metalness: 0.1,
+      roughness: 0.3,
       ior: 2.0,
       thickness: 0.1,
       specularColor: new Color(0x0077ff),
@@ -33,7 +33,6 @@ export class MaterialManager {
       this.standardMaterialUniforms.ditheringNear = { value: 0.25 };
       this.standardMaterialUniforms.ditheringRange = { value: 0.5 };
       this.standardMaterialUniforms.time = { value: 0.0 };
-      this.standardMaterialUniforms.resolution = { value: new Vector2() };
       this.standardMaterialUniforms.diffuseRandomColor = { value: new Color() };
       shader.uniforms = this.standardMaterialUniforms;
 
@@ -49,7 +48,6 @@ export class MaterialManager {
           uniform float ditheringNear;
           uniform float ditheringRange;
           uniform float time;
-          uniform vec2 resolution;
           uniform vec3 diffuseRandomColor;
           ${bayerDither}
         `,
@@ -74,10 +72,10 @@ export class MaterialManager {
           }
           if (distance <= ditheringNear + d * ditheringRange) discard;
           vec2 suv = vUv;
-          float s = clamp(0.35 + 0.35 * sin(5.0 * time + suv.y * resolution.y * 0.5), 0.0, 1.0);
+          float s = clamp(0.35 + 0.35 * sin(5.0 * -time + suv.y * 500.0), 0.0, 1.0);
           float scanLines = pow(s, 1.33);
           outgoingLight *= diffuseRandomColor;
-          outgoingLight += (1.0 - scanLines) * 0.025;
+          outgoingLight += smoothstep(0.1, 0.0, scanLines) * 0.1;
         `,
       );
     };

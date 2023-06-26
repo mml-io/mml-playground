@@ -1,6 +1,6 @@
 import { Clock } from "three";
 
-export class RunTime {
+export class RunTimeManager {
   private clock: Clock;
   private bufferSize: number = 30;
   private deltaTimeBuffer: number[] = [];
