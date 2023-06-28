@@ -7,7 +7,7 @@
   "scripts": {
     "preinstall": "node check-node-version.js",
     "build": "lerna run --stream build",
-    "start": "lerna run --stream start",
+    "start": "npm run start -w @mml-playground/server",
     "iterate": "lerna run --parallel --stream iterate",
     "type-check": "lerna run --stream type-check",
     "lint": "lerna run --stream lint",
