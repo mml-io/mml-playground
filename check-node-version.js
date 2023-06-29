@@ -12,8 +12,8 @@ try {
 const currentVersion = process.version.trim();
 const nvmrcVersion = nvmrc.trim();
 
-if (currentVersion === nvmrcVersion) {
-  console.log(`Node version matches: ${currentVersion}`);
+if (currentVersion.startsWith(nvmrcVersion)) {
+  console.log(`nvmrc node version (${nvmrcVersion}) matches: ${currentVersion}`);
 } else {
   console.error(`Node version mismatch (${currentVersion} != ${nvmrcVersion}).`);
   console.log(`Run 'nvm install ${nvmrcVersion}' to resolve.`);
