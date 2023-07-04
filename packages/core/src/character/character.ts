@@ -4,13 +4,17 @@ import {
   AnimationMixer,
   Box3,
   BoxHelper,
+  BufferGeometry,
   Color,
+  Line3,
+  Material,
   Mesh,
   MeshStandardMaterial,
   Object3D,
   SphereGeometry,
   Vector3,
 } from "three";
+import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 
 import { MaterialManager } from "../rendering/materials/material-manager";
 
@@ -26,6 +30,19 @@ export type CharacterDescription = {
 };
 
 export type AnimationTypes = "idle" | "walk" | "run";
+
+type CapsuleInfo = {
+  radius?: number;
+  segment?: Line3;
+};
+
+export class ExtendedMesh extends Mesh {
+  capsuleInfo: CapsuleInfo;
+  constructor(geometry: BufferGeometry, material: Material) {
+    super(geometry, material);
+    this.capsuleInfo = {};
+  }
+}
 
 export class Character {
   public debug = false;
@@ -56,6 +73,8 @@ export class Character {
   public head: Object3D | null = null;
   public position: Vector3 = new Vector3();
   public headPosition: Vector3 = new Vector3();
+
+  public modelCollider: ExtendedMesh | null = null;
 
   public color: Color = new Color();
 
@@ -140,11 +159,27 @@ export class Character {
       this.model.name = this.name as string;
       this.applyMaterialToAllSkinnedMeshes(this.materialManager.standardMaterial);
       if (this.isLocal) {
+        this.modelCollider = new ExtendedMesh(
+          new RoundedBoxGeometry(1.0, 1.8, 1.0, 5, 0.5),
+          new MeshStandardMaterial({
+            color: 0xff0000,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.1,
+          }),
+        );
+        this.modelCollider.visible = true;
+        this.modelCollider.capsuleInfo = {
+          radius: 0.01,
+          segment: new Line3(new Vector3(), new Vector3(0, -1.0, 0.0)),
+        };
+
         await this.setAnimationFromFile(this.characterDescription.idleAnimationFileUrl, "idle");
         await this.setAnimationFromFile(this.characterDescription.jogAnimationFileUrl, "walk");
         await this.setAnimationFromFile(this.characterDescription.sprintAnimationFileUrl, "run");
         this.controller = new LocalController(
           this.model,
+          this.modelCollider,
           this.animations,
           this.animationMixer!,
           this.id,

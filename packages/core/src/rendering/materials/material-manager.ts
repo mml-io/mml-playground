@@ -1,12 +1,13 @@
 import { Color, CubeTexture, MeshPhysicalMaterial, UniformsUtils } from "three";
 
-import { injectBefore, injectBeforeMain, injectInsideMain } from "../../utils/webgl/shader-helpers";
-import { bayerDither } from "../../utils/webgl/shaderchunks/bayer-dither";
-import { TUniforms } from "../../utils/webgl/types";
+import { bayerDither } from "../shaders/bayer-dither";
+import { injectBefore, injectBeforeMain, injectInsideMain } from "../shaders/shader-helpers";
+
+type TUniform<TValue = any> = { value: TValue };
 
 export class MaterialManager {
   public standardMaterial: MeshPhysicalMaterial;
-  public standardMaterialUniforms: TUniforms = {};
+  public standardMaterialUniforms: Record<string, TUniform> = {};
 
   public envTexture: CubeTexture | null = null;
 

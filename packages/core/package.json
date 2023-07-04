@@ -19,7 +19,8 @@
   "dependencies": {
     "mml-web": "0.1.0",
     "three": "^0.153.0",
-    "postprocessing": "6.32.1"
+    "postprocessing": "6.32.1",
+    "three-mesh-bvh": "0.6.0"
   },
   "devDependencies": {
     "@types/three": "^0.152.1"
