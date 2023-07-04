@@ -3,6 +3,7 @@ import { Object3D, PerspectiveCamera } from "three";
 import { CameraManager } from "../camera/camera-manager";
 
 export class CharacterTransformProbe {
+  private shouldUpdateHash: boolean = false;
   encodeCharacterAndCamera = (character: Object3D, camera: PerspectiveCamera): void => {
     const state = {
       character: {
@@ -20,7 +21,7 @@ export class CharacterTransformProbe {
       ...state.camera.position,
       ...state.camera.quaternion,
     ].join(",");
-    window.location.hash = hash;
+    if (this.shouldUpdateHash) window.location.hash = hash;
   };
 
   decodeCharacterAndCamera(character: Object3D, cameraManager: CameraManager) {

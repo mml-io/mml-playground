@@ -9,9 +9,11 @@ import {
   CoreMMLScene,
   RunTimeManager,
   Network,
+  CollisionsStore,
 } from "@mml-playground/core";
 import { Scene, Fog, PerspectiveCamera, Group } from "three";
 
+import { Environment } from "./environment";
 import { Lights } from "./lights";
 import { Room } from "./room";
 
@@ -26,6 +28,7 @@ export class App {
   private cameraManager: CameraManager;
   private composer: Composer;
   private network: Network;
+  private collisionsStore = CollisionsStore;
 
   private modelsPath: string = "/assets/models";
   private characterDescription: CharacterDescription | null = null;
@@ -33,7 +36,7 @@ export class App {
   constructor() {
     this.group = new Group();
     this.scene = new Scene();
-    this.scene.fog = new Fog(0xb1b1b1, 0.1, 90);
+    this.scene.fog = new Fog(0xdcdcdc, 0.1, 100);
 
     this.runTime = new RunTimeManager();
     this.inputManager = new InputManager();
@@ -42,10 +45,17 @@ export class App {
     this.camera = this.cameraManager.camera;
     this.composer = new Composer(this.scene, this.camera);
     this.network = new Network();
+    this.collisionsStore.setScene(this.scene);
 
     new CoreMMLScene(this.group, document.body, this.composer.renderer, this.scene, this.camera);
-    new Room(this.scene, this.composer.renderer, (modelGroup) => this.group.add(modelGroup));
+
+    new Environment(this.scene, this.composer.renderer, (modelGroup) => this.group.add(modelGroup));
+    new Room((modelGroup) => {
+      this.collisionsStore.addMeshesGroup(modelGroup);
+      this.group.add(modelGroup);
+    });
     new Lights((subGroup) => this.group.add(subGroup));
+
     this.scene.add(this.group);
 
     this.characterDescription = {
@@ -58,6 +68,16 @@ export class App {
 
     this.init = this.init.bind(this);
     this.update = this.update.bind(this);
+  }
+
+  traverse(group: Group | Scene) {
+    group.traverse((child) => {
+      if (child.type === "Mesh") {
+        console.log(child);
+      } else if (child.type === "Group") {
+        console.log(child);
+      }
+    });
   }
 
   async init() {

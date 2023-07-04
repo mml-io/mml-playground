@@ -1,10 +1,10 @@
 import { Group, PerspectiveCamera } from "three";
 
 import { CameraManager } from "../camera/camera-manager";
+import { getSpawnPositionInsideCircle } from "../helpers/math-helpers";
 import { InputManager } from "../input/input-manager";
 import { Network } from "../network/network";
 import { RunTimeManager } from "../runtime/runtime-manager";
-import { getSpawnPositionInsideCircle } from "../utils/math-helpers";
 
 import { Character, CharacterDescription } from "./character";
 import { CharacterTransformProbe } from "./character-transform-probe";
@@ -33,10 +33,16 @@ export class CharacterManager {
     const characterLoadingPromise = new Promise<Character>((resolve) => {
       const character = new Character(characterDescription, id, isLocal, () => {
         const spawnPosition = getSpawnPositionInsideCircle(7, 30, id);
-        character.model.position.set(spawnPosition.x, spawnPosition.y + 0.04, spawnPosition.z);
-
+        character.model.position.set(spawnPosition.x, spawnPosition.y + 2.04, spawnPosition.z);
+        character.modelCollider?.position.set(
+          spawnPosition.x,
+          spawnPosition.y + 0.04,
+          spawnPosition.z,
+        );
+        character.modelCollider?.updateMatrixWorld();
         character.hideMaterialByMeshName("SK_UE5Mannequin_1");
         group.add(character.model);
+        group.add(character.modelCollider!);
 
         if (isLocal) {
           this.character = character;
@@ -103,6 +109,11 @@ export class CharacterManager {
       if (runTime.frame % 60 === 0 && this.camera) {
         if (this.positionedFromUrl === false) {
           this.transformProbe.decodeCharacterAndCamera(this.character.model, cameraManager);
+          this.character.modelCollider?.position.set(
+            this.character.model.position.x,
+            this.character.model.position.y + 0.9,
+            this.character.model.position.z,
+          );
           this.positionedFromUrl = true;
         }
         this.transformProbe.encodeCharacterAndCamera(this.character.model, this.camera);

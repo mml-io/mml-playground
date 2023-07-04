@@ -10,7 +10,17 @@ import {
   ScenePosition,
   setGlobalMScene,
 } from "mml-web";
-import { AudioListener, Group, PerspectiveCamera, Scene, Vector3, WebGLRenderer } from "three";
+import {
+  AudioListener,
+  Group,
+  Object3D,
+  PerspectiveCamera,
+  Scene,
+  Vector3,
+  WebGLRenderer,
+} from "three";
+
+import { CollisionsStore } from "../collisions/collisions-manager";
 
 export class CoreMMLScene {
   private debug: boolean = false;
@@ -54,9 +64,15 @@ export class CoreMMLScene {
       getRootContainer: () => group,
       getCamera: () => camera,
       getUserPosition: () => this.scenePosition,
-      addCollider: () => {},
-      updateCollider: () => {},
-      removeCollider: () => {},
+      addCollider: (object: Object3D) => {
+        CollisionsStore.addMeshesGroup(object as Group);
+      },
+      updateCollider: (object: Object3D) => {
+        CollisionsStore.updateMeshesGroup(object as Group);
+      },
+      removeCollider: (object: Object3D) => {
+        CollisionsStore.removeMeshesGroup(object as Group);
+      },
       addInteraction: (interaction: Interaction) => {
         this.interactionListener.addInteraction(interaction);
       },
