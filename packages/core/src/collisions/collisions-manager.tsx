@@ -17,7 +17,7 @@ type TBufferGeometry = BufferGeometry<NormalBufferAttributes>;
 type TBufferGeometries = TBufferGeometry[];
 
 export class CollisionsManager {
-  private debug: boolean = true;
+  private debug: boolean = false;
   private scene: Scene | null = null;
   private geometries: Map<string, TBufferGeometry> = new Map();
 
@@ -108,7 +108,7 @@ export class CollisionsManager {
         newBufferGeometry,
         new MeshStandardMaterial({ color: 0xff0000, side: FrontSide, wireframe: true }),
       );
-      this.mergedMesh.visible = false;
+      this.mergedMesh.visible = this.debug;
       this.mergedMesh.geometry.boundsTree = new MeshBVH(newBufferGeometry);
 
       this.staticCollider = new Mesh(
@@ -120,6 +120,7 @@ export class CollisionsManager {
       if (this.scene && this.visualizer) this.scene.remove(this.visualizer);
       this.visualizer = new MeshBVHVisualizer(this.staticCollider, 12);
       this.visualizer.edgeMaterial.color = new Color(0x0000ff);
+      this.visualizer.visible = this.debug;
       this.visualizer.update();
       if (this.scene) this.scene.add(this.visualizer);
     }

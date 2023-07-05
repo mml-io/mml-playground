@@ -1,25 +1,7 @@
-import {
-  AnimationAction,
-  AnimationClip,
-  AnimationMixer,
-  Box3,
-  BoxHelper,
-  BufferGeometry,
-  Color,
-  Line3,
-  Material,
-  Mesh,
-  MeshStandardMaterial,
-  Object3D,
-  SphereGeometry,
-  Vector3,
-} from "three";
-import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
+import { Color, Vector3 } from "three";
 
-import { MaterialManager } from "../rendering/materials/material-manager";
-
+import { CharacterModel } from "./character-model";
 import { LocalController } from "./controller-local";
-import { ModelLoader } from "./model-loader";
 
 export type CharacterDescription = {
   meshFileUrl: string;
@@ -31,55 +13,20 @@ export type CharacterDescription = {
 
 export type AnimationTypes = "idle" | "walk" | "run";
 
-type CapsuleInfo = {
-  radius?: number;
-  segment?: Line3;
-};
-
-export class ExtendedMesh extends Mesh {
-  capsuleInfo: CapsuleInfo;
-  constructor(geometry: BufferGeometry, material: Material) {
-    super(geometry, material);
-    this.capsuleInfo = {};
-  }
-}
-
 export class Character {
   public debug = false;
-
-  private modelLoader: ModelLoader = new ModelLoader();
-
   private characterDescription: CharacterDescription;
-
-  private debugHelper: BoxHelper | null = null;
-  private boundingBox: Box3 | null = null;
-  private boundingSize: Vector3 | null = null;
-
-  private modelUrl: string;
   private modelLoadedCallback: () => void;
-
-  private extension: string | null = null;
-
-  private materialManager: MaterialManager = new MaterialManager();
 
   public controller: LocalController | null = null;
 
-  public isLocal: boolean;
   public id: number = 0;
+  public isLocal: boolean;
   public name: string | null = null;
-
-  public model: Object3D;
-  public modelScale: number;
-  public head: Object3D | null = null;
-  public position: Vector3 = new Vector3();
-  public headPosition: Vector3 = new Vector3();
-
-  public modelCollider: ExtendedMesh | null = null;
-
+  public model: CharacterModel | null = null;
   public color: Color = new Color();
 
-  public animationMixer: AnimationMixer | null = null;
-  public animations: Record<string, AnimationAction> = {};
+  public position: Vector3 = new Vector3();
 
   constructor(
     characterDescription: CharacterDescription,
@@ -87,152 +34,29 @@ export class Character {
     isLocal: boolean,
     modelLoadedCallback: () => void,
   ) {
-    this.isLocal = isLocal;
-    this.id = id;
     this.characterDescription = characterDescription;
-    this.modelUrl = this.characterDescription.meshFileUrl;
-    this.modelScale = this.characterDescription.modelScale;
+    this.id = id;
+    this.isLocal = isLocal;
     this.modelLoadedCallback = modelLoadedCallback;
-
-    this.color = this.materialManager.colorsCube216[id];
     this.load();
   }
 
-  preprocessModel(model: Object3D): void {
-    if (this.debug === true) {
-      this.debugHelper = new BoxHelper(model, 0xffff00);
-      model.add(this.debugHelper);
-    }
-    this.boundingBox = new Box3().setFromObject(model);
-    this.boundingSize = this.boundingBox.getSize(new Vector3());
-    this.head = new Mesh(
-      new SphereGeometry(0.12, 6, 6),
-      new MeshStandardMaterial({ color: 0xffff00, wireframe: true }),
-    );
-    this.head.position.set(
-      model.position.x,
-      model.position.y + (this.boundingSize.y > 1.0 ? this.boundingSize.y * 0.85 : 1.7),
-      model.position.z,
-    );
-    if (this.debug === false) this.head.visible = false;
-    model.add(this.head);
-    model.traverse((child: Object3D) => {
-      if (child.type === "SkinnedMesh") {
-        child.castShadow = true;
-        child.receiveShadow = true;
-      }
-    });
-  }
-
-  async setAnimationFromFile(
-    animationFileUrl: string,
-    animationType: AnimationTypes,
-  ): Promise<void> {
-    return new Promise(async (resolve, reject) => {
-      if (this.animationMixer === null) {
-        this.animationMixer = new AnimationMixer(this.model);
-      }
-      const animation = await this.modelLoader.load(animationFileUrl, "animation");
-      if (typeof animation !== "undefined" && animation instanceof AnimationClip) {
-        this.animations[animationType] = this.animationMixer.clipAction(animation);
-        this.animations[animationType].stop();
-        if (animationType === "idle") this.animations[animationType].play();
-        resolve();
-      } else {
-        reject();
-      }
-    });
-  }
-
   async load(): Promise<void> {
-    this.extension = this.modelUrl.split(".").pop()!;
-    this.name = this.modelUrl.split("/").pop()!.replace(`.${this.extension!}`, "");
-    if (!this.extension) {
-      console.error(`Error: unrecognized model type at ${this.modelUrl}`);
-      return;
+    this.model = new CharacterModel(this.characterDescription);
+    await this.model.init();
+    this.color = this.model.material.colorsCube216[this.id];
+    if (this.isLocal) {
+      this.controller = new LocalController(this.model, this.id);
     }
-    const model = await this.modelLoader.load(this.modelUrl, "model");
-    if (typeof model !== "undefined") {
-      this.model = model as Object3D;
-      this.preprocessModel(this.model);
-      this.model.scale.x = this.model.scale.y = this.model.scale.z = this.modelScale;
-      this.model.name = this.name as string;
-      this.applyMaterialToAllSkinnedMeshes(this.materialManager.standardMaterial);
-      if (this.isLocal) {
-        this.modelCollider = new ExtendedMesh(
-          new RoundedBoxGeometry(1.0, 1.8, 1.0, 5, 0.5),
-          new MeshStandardMaterial({
-            color: 0xff0000,
-            wireframe: true,
-            transparent: true,
-            opacity: 0.1,
-          }),
-        );
-        this.modelCollider.visible = true;
-        this.modelCollider.capsuleInfo = {
-          radius: 0.01,
-          segment: new Line3(new Vector3(), new Vector3(0, -1.0, 0.0)),
-        };
-
-        await this.setAnimationFromFile(this.characterDescription.idleAnimationFileUrl, "idle");
-        await this.setAnimationFromFile(this.characterDescription.jogAnimationFileUrl, "walk");
-        await this.setAnimationFromFile(this.characterDescription.sprintAnimationFileUrl, "run");
-        this.controller = new LocalController(
-          this.model,
-          this.modelCollider,
-          this.animations,
-          this.animationMixer!,
-          this.id,
-        );
-      }
-      this.modelLoadedCallback();
-    }
-  }
-
-  setHeadTargetToBone(boneName: string): void {
-    this.model.traverse((child: Object3D) => {
-      if (child.type === "Bone" && child.name === boneName) {
-        this.head = child;
-      }
-    });
-  }
-
-  replaceMaterialByMeshName(meshName: string, material: any): void {
-    this.model.traverse((child: Object3D) => {
-      if (child.name === meshName) {
-        (child as Mesh).material = material;
-      }
-    });
-  }
-
-  applyMaterialToAllSkinnedMeshes(material: any): void {
-    this.model.traverse((child: Object3D) => {
-      if (child.type === "SkinnedMesh") {
-        (child as Mesh).material = material;
-      }
-    });
-  }
-
-  hideMaterialByMeshName(meshName: any): void {
-    this.model.traverse((child: Object3D) => {
-      if (child.type === "SkinnedMesh" && child.name === meshName) {
-        (child as Mesh).material = new MeshStandardMaterial({
-          color: 0xff0000,
-          transparent: true,
-          opacity: 0,
-        });
-      }
-    });
+    this.modelLoadedCallback();
   }
 
   update(time: number) {
-    if (this.materialManager) {
-      if (typeof this.materialManager.standardMaterialUniforms.time !== "undefined") {
-        this.materialManager.standardMaterialUniforms.time.value = time;
-        this.materialManager.standardMaterialUniforms.diffuseRandomColor.value = this.color;
-      }
+    if (!this.model) return;
+    this.position = this.model.mesh!.getWorldPosition(new Vector3());
+    if (typeof this.model.material.uniforms.time !== "undefined") {
+      this.model.material.uniforms.time.value = time;
+      this.model.material.uniforms.diffuseRandomColor.value = this.color;
     }
-    this.headPosition = this.head?.getWorldPosition(new Vector3()) || new Vector3();
-    if (this.model) this.position = this.model.getWorldPosition(new Vector3());
   }
 }

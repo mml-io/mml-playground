@@ -41,7 +41,7 @@ export class RemoteController {
   constructor(character: Character, id: number) {
     this.id = id;
     this.character = character;
-    this.characterModel = this.character.model;
+    this.characterModel = this.character.model!.mesh!;
     this.animationMixer = new AnimationMixer(this.characterModel);
   }
 
@@ -79,6 +79,7 @@ export class RemoteController {
   }
 
   transitionToAnimation(targetAnimation: string, transitionDuration: number = 0.21): void {
+    console.log(targetAnimation);
     if (this.currentAnimation === targetAnimation) return;
 
     const currentAction = this.animations[this.currentAnimation];

@@ -1,4 +1,4 @@
-import { Group, PerspectiveCamera } from "three";
+import { Group, PerspectiveCamera, Vector3 } from "three";
 
 import { CameraManager } from "../camera/camera-manager";
 import { getSpawnPositionInsideCircle } from "../helpers/math-helpers";
@@ -33,16 +33,9 @@ export class CharacterManager {
     const characterLoadingPromise = new Promise<Character>((resolve) => {
       const character = new Character(characterDescription, id, isLocal, () => {
         const spawnPosition = getSpawnPositionInsideCircle(7, 30, id);
-        character.model.position.set(spawnPosition.x, spawnPosition.y + 2.04, spawnPosition.z);
-        character.modelCollider?.position.set(
-          spawnPosition.x,
-          spawnPosition.y + 0.04,
-          spawnPosition.z,
-        );
-        character.modelCollider?.updateMatrixWorld();
-        character.hideMaterialByMeshName("SK_UE5Mannequin_1");
-        group.add(character.model);
-        group.add(character.modelCollider!);
+        character.model!.mesh!.position.set(spawnPosition.x, spawnPosition.y, spawnPosition.z);
+        character.model!.hideMaterialByMeshName("SK_UE5Mannequin_1");
+        group.add(character.model!.mesh!);
 
         if (isLocal) {
           this.character = character;
@@ -76,7 +69,7 @@ export class CharacterManager {
       if (this.transformProbe === null) {
         this.transformProbe = new CharacterTransformProbe();
       }
-      cameraManager.setTarget(this.character.headPosition);
+      cameraManager.setTarget(this.character.position.add(new Vector3(0, 1.3, 0)));
 
       if (this.character.controller) {
         this.character.controller.update(inputManager, cameraManager, runTime);
@@ -100,7 +93,7 @@ export class CharacterManager {
 
       for (const [id, character] of this.remoteCharacters) {
         if (!network.clientUpdates.has(id)) {
-          group.remove(character.model);
+          group.remove(character.model!.mesh!);
           this.remoteCharacters.delete(id);
           this.remoteCharacterControllers.delete(id);
         }
@@ -108,15 +101,10 @@ export class CharacterManager {
 
       if (runTime.frame % 60 === 0 && this.camera) {
         if (this.positionedFromUrl === false) {
-          this.transformProbe.decodeCharacterAndCamera(this.character.model, cameraManager);
-          this.character.modelCollider?.position.set(
-            this.character.model.position.x,
-            this.character.model.position.y + 0.9,
-            this.character.model.position.z,
-          );
+          this.transformProbe.decodeCharacterAndCamera(this.character.model!.mesh!, cameraManager);
           this.positionedFromUrl = true;
         }
-        this.transformProbe.encodeCharacterAndCamera(this.character.model, this.camera);
+        this.transformProbe.encodeCharacterAndCamera(this.character.model!.mesh!, this.camera);
       }
     }
   }
