@@ -1,38 +1,31 @@
 import {
   IMMLScene,
   Interaction,
+  InteractionListener,
   InteractionManager,
   MMLClickTrigger,
   PromptManager,
-  InteractionListener,
   PromptProps,
   registerCustomElementsToWindow,
-  ScenePosition,
   setGlobalMScene,
+  ScenePosition,
 } from "mml-web";
-import {
-  AudioListener,
-  Group,
-  Object3D,
-  PerspectiveCamera,
-  Scene,
-  Vector3,
-  WebGLRenderer,
-} from "three";
+import { AudioListener, Group, Object3D, PerspectiveCamera, Scene, WebGLRenderer } from "three";
 
-import { CollisionsStore } from "../collisions/collisions-manager";
+import { CollisionsManager } from "../collisions/collisions-manager";
 
 export class CoreMMLScene {
   private debug: boolean = false;
   private scene: THREE.Scene;
   private camera: THREE.Camera;
   private mmlScene: Partial<IMMLScene>;
-  private scenePosition: ScenePosition;
+  private getUserPositionAndRotation: () => ScenePosition;
   private promptManager: PromptManager;
   private interactionListener: InteractionListener;
   private elementsHolder: HTMLElement;
   private audioListener: AudioListener;
   private clickTrigger: MMLClickTrigger;
+  private collisionsManager: CollisionsManager;
 
   constructor(
     group: Group,
@@ -40,18 +33,18 @@ export class CoreMMLScene {
     renderer: WebGLRenderer,
     scene: Scene,
     camera: PerspectiveCamera,
+    collisionsManager: CollisionsManager,
+    getUserPositionAndRotation: () => ScenePosition,
   ) {
     this.scene = scene;
     this.camera = camera;
     this.elementsHolder = elementsHolder;
-    this.scenePosition = {
-      location: camera.position,
-      orientation: new Vector3(camera.rotation.x, camera.rotation.y, camera.rotation.z),
-    };
+    this.collisionsManager = collisionsManager;
     this.promptManager = PromptManager.init(document.body);
 
     const { interactionListener } = InteractionManager.init(document.body, this.camera, this.scene);
     this.interactionListener = interactionListener;
+    this.getUserPositionAndRotation = getUserPositionAndRotation;
 
     this.audioListener = new AudioListener();
 
@@ -63,16 +56,16 @@ export class CoreMMLScene {
       getThreeScene: () => scene,
       getRootContainer: () => group,
       getCamera: () => camera,
-      getUserPosition: () => this.scenePosition,
       addCollider: (object: Object3D) => {
-        CollisionsStore.addMeshesGroup(object as Group);
+        this.collisionsManager.addMeshesGroup(object as Group);
       },
       updateCollider: (object: Object3D) => {
-        CollisionsStore.updateMeshesGroup(object as Group);
+        this.collisionsManager.updateMeshesGroup(object as Group);
       },
       removeCollider: (object: Object3D) => {
-        CollisionsStore.removeMeshesGroup(object as Group);
+        this.collisionsManager.removeMeshesGroup(object as Group);
       },
+      getUserPosition: this.getUserPositionAndRotation,
       addInteraction: (interaction: Interaction) => {
         this.interactionListener.addInteraction(interaction);
       },

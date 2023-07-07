@@ -7,4 +7,4 @@ export { Network } from "./network";
 export { Composer } from "./rendering/composer";
 export { RunTimeManager } from "./runtime/runtime-manager";
 export { networkDebugOverlay } from "./network/network-debug";
-export { CollisionsManager, CollisionsStore } from "./collisions/collisions-manager";
+export { CollisionsManager } from "./collisions/collisions-manager";

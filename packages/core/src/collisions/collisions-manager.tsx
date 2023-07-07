@@ -5,7 +5,6 @@ import {
   Group,
   Mesh,
   MeshStandardMaterial,
-  NormalBufferAttributes,
   Object3D,
   Scene,
   Vector3,
@@ -13,118 +12,114 @@ import {
 import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { MeshBVH, MeshBVHVisualizer } from "three-mesh-bvh";
 
-type TBufferGeometry = BufferGeometry<NormalBufferAttributes>;
-type TBufferGeometries = TBufferGeometry[];
+type CollisionMeshState = {
+  source: Group;
+  meshBVH: MeshBVH;
+  visualizer: MeshBVHVisualizer | null;
+};
 
 export class CollisionsManager {
   private debug: boolean = false;
-  private scene: Scene | null = null;
-  private geometries: Map<string, TBufferGeometry> = new Map();
+  private scene: Scene;
+  private tempVector: Vector3 = new Vector3();
+  private tempVector2: Vector3 = new Vector3();
 
-  public mergedMesh: Mesh<BufferGeometry, MeshStandardMaterial> | null = null;
-  public staticCollider: Mesh<BufferGeometry, MeshStandardMaterial> | null = null;
-  public collider: any = null;
+  private collisionMeshState: Map<Group, CollisionMeshState> = new Map();
 
-  private visualizer: MeshBVHVisualizer | null = null;
-
-  private mergeBufferGeometries: (geometries: TBufferGeometries) => TBufferGeometry;
-  public toggleDebug: () => void;
-
-  constructor() {
-    this.mergeBufferGeometries = BufferGeometryUtils.mergeGeometries;
-
-    this.toggleDebug = () => {
-      this.debug = !this.debug;
-      if (this.mergedMesh) this.mergedMesh.visible = this.debug;
-    };
+  constructor(scene: Scene) {
+    this.scene = scene;
   }
 
-  public setScene(scene: Scene) {
-    if (this.scene === null) {
-      this.scene = scene;
-    } else {
-      console.error("[CollisionsManager] error: scene already set");
+  private createCollisionMeshState(group: Group): CollisionMeshState {
+    const geometries: Array<BufferGeometry> = [];
+    group.traverse((child: Object3D) => {
+      if (child.type === "Mesh") {
+        const mesh = child as Mesh;
+        mesh.localToWorld(new Vector3());
+        mesh.updateMatrixWorld();
+        const geometry = mesh.geometry.clone();
+        geometry.applyMatrix4(mesh.matrixWorld);
+        geometries.push(geometry);
+      }
+    });
+    const newBufferGeometry = BufferGeometryUtils.mergeGeometries(geometries);
+    const meshBVH = new MeshBVH(newBufferGeometry);
+
+    if (!this.debug) {
+      return { source: group, visualizer: null, meshBVH };
     }
+
+    const mergedMesh = new Mesh(
+      newBufferGeometry,
+      new MeshStandardMaterial({ color: 0xff0000, side: FrontSide, wireframe: true }),
+    );
+    mergedMesh.geometry.boundsTree = meshBVH;
+    const visualizer = new MeshBVHVisualizer(mergedMesh, 3);
+    visualizer.edgeMaterial.color = new Color(0x0000ff);
+    visualizer.update();
+    return { source: group, visualizer, meshBVH };
   }
 
   public addMeshesGroup(group: Group): void {
-    group.traverse((child: Object3D) => {
-      if (child.type === "Mesh") this.addMesh(child as Mesh);
-    });
-  }
-
-  public addMesh(mesh: Mesh): void {
-    const meshUUID = mesh.uuid;
-    if (!this.geometries.has(meshUUID)) {
-      if (this.debug) console.log(`adds collision: ${meshUUID}`);
-      mesh.localToWorld(new Vector3());
-      mesh.updateMatrixWorld();
-      const geometry = mesh.geometry.clone();
-      geometry.applyMatrix4(mesh.matrixWorld);
-      this.geometries.set(meshUUID, geometry);
-      this.mergeGeometries();
+    const meshState = this.createCollisionMeshState(group);
+    if (meshState.visualizer) {
+      this.scene.add(meshState.visualizer);
     }
+    this.collisionMeshState.set(group, meshState);
   }
 
   public updateMeshesGroup(group: Group): void {
-    group.traverse((child: Object3D) => {
-      if (child.type === "Mesh") this.updateMesh(child as Mesh);
-    });
-  }
-
-  public updateMesh(mesh: Mesh): void {
-    const meshUUID = mesh.uuid;
-    if (this.geometries.has(meshUUID)) {
-      mesh.localToWorld(new Vector3());
-      mesh.updateMatrixWorld();
-      const geometry = mesh.geometry.clone();
-      geometry.applyMatrix4(mesh.matrixWorld);
-      this.geometries.set(meshUUID, geometry);
-      this.mergeGeometries();
+    const meshState = this.collisionMeshState.get(group);
+    if (meshState) {
+      const newMeshState = this.createCollisionMeshState(group);
+      if (meshState.visualizer) {
+        this.scene.remove(meshState.visualizer);
+      }
+      if (newMeshState.visualizer) {
+        this.scene.add(newMeshState.visualizer);
+      }
+      this.collisionMeshState.set(group, newMeshState);
     }
   }
 
   public removeMeshesGroup(group: Group): void {
-    group.traverse((child: Object3D) => {
-      if (child.type === "Mesh") this.removeMesh(child as Mesh);
-    });
-  }
-
-  public removeMesh(mesh: Mesh): void {
-    const meshUUID = mesh.uuid;
-    if (this.geometries.has(meshUUID)) {
-      const successRemoving = this.geometries.delete(meshUUID);
-      if (successRemoving && this.debug) console.log(`removes collision: ${meshUUID}`);
+    const meshState = this.collisionMeshState.get(group);
+    if (meshState) {
+      if (meshState.visualizer) {
+        this.scene.remove(meshState.visualizer);
+      }
+      this.collisionMeshState.delete(group);
     }
-    this.mergeGeometries();
   }
 
-  public mergeGeometries(): void {
-    if (this.geometries.size > 0) {
-      const geometries: TBufferGeometries = Array.from(this.geometries.values());
-      const newBufferGeometry = this.mergeBufferGeometries(geometries);
+  private applyCollider(
+    tempSegment: THREE.Line3,
+    radius: number,
+    boundingBox: THREE.Box3,
+    meshState: CollisionMeshState,
+  ): boolean {
+    let didCollide = false;
+    meshState.meshBVH.shapecast({
+      intersectsBounds: (box) => box.intersectsBox(boundingBox),
+      intersectsTriangle: (tri) => {
+        const triPoint = this.tempVector;
+        const capsulePoint = this.tempVector2;
+        const distance = tri.closestPointToSegment(tempSegment, triPoint, capsulePoint);
+        if (distance < radius) {
+          const depth = radius - distance;
+          const direction = capsulePoint.sub(triPoint).normalize();
+          tempSegment.start.addScaledVector(direction, depth);
+          tempSegment.end.addScaledVector(direction, depth);
+          didCollide = true;
+        }
+      },
+    });
+    return didCollide;
+  }
 
-      this.mergedMesh = new Mesh(
-        newBufferGeometry,
-        new MeshStandardMaterial({ color: 0xff0000, side: FrontSide, wireframe: true }),
-      );
-      this.mergedMesh.visible = this.debug;
-      this.mergedMesh.geometry.boundsTree = new MeshBVH(newBufferGeometry);
-
-      this.staticCollider = new Mesh(
-        newBufferGeometry,
-        new MeshStandardMaterial({ color: 0x00ffff, wireframe: true }),
-      );
-      this.staticCollider.updateMatrix();
-
-      if (this.scene && this.visualizer) this.scene.remove(this.visualizer);
-      this.visualizer = new MeshBVHVisualizer(this.staticCollider, 12);
-      this.visualizer.edgeMaterial.color = new Color(0x0000ff);
-      this.visualizer.visible = this.debug;
-      this.visualizer.update();
-      if (this.scene) this.scene.add(this.visualizer);
+  public applyColliders(tempSegment: THREE.Line3, radius: number, boundingBox: THREE.Box3): void {
+    for (const meshState of this.collisionMeshState.values()) {
+      this.applyCollider(tempSegment, radius, boundingBox, meshState);
     }
   }
 }
-
-export const CollisionsStore = new CollisionsManager();
