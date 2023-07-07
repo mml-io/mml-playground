@@ -66,6 +66,10 @@ export class InputManager {
     return this.isKeyPressed("shift");
   }
 
+  isJumping(): boolean {
+    return this.isKeyPressed(" ");
+  }
+
   dispose() {
     document.removeEventListener("mousemove", this.onMouseMove.bind(this));
     document.removeEventListener("keydown", this.onKeyDown.bind(this));

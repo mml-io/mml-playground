@@ -38,6 +38,10 @@ export class LocalController {
   private tempVector2: Vector3 = new Vector3();
   private lastIntersectedTriangleNormal: Vector3 = new Vector3();
 
+  private jumpInput: boolean = false;
+  private jumpForce: number = 10;
+  private canJump: boolean = true;
+
   private inputDirections: {
     forward: boolean;
     backward: boolean;
@@ -127,9 +131,16 @@ export class LocalController {
     this.speed += ease(this.targetSpeed, this.speed, 0.07);
 
     if (this.characterOnGround) {
-      this.characterVelocity.y = deltaTime * this.gravity;
+      this.canJump = true;
+      if (this.jumpInput && this.canJump) {
+        this.characterVelocity.y += this.jumpForce;
+        this.canJump = false;
+      } else {
+        this.characterVelocity.y = deltaTime * this.gravity;
+      }
     } else {
       this.characterVelocity.y += deltaTime * this.gravity;
+      this.canJump = false;
     }
 
     this.model.mesh.position.addScaledVector(this.characterVelocity, deltaTime);
@@ -238,6 +249,9 @@ export class LocalController {
     const backward = inputManager.isKeyPressed("s");
     const left = inputManager.isKeyPressed("a");
     const right = inputManager.isKeyPressed("d");
+
+    this.jumpInput = inputManager.isJumping();
+
     this.inputDirections = { forward, backward, left, right };
     this.runInput = inputManager.isShiftPressed();
 
