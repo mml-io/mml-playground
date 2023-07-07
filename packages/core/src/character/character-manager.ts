@@ -1,6 +1,8 @@
-import { Group, PerspectiveCamera, Vector3 } from "three";
+import { ScenePosition } from "mml-web";
+import { Euler, Group, PerspectiveCamera, Vector3 } from "three";
 
 import { CameraManager } from "../camera/camera-manager";
+import { CollisionsManager } from "../collisions/collisions-manager";
 import { getSpawnPositionInsideCircle } from "../helpers/math-helpers";
 import { InputManager } from "../input/input-manager";
 import { Network } from "../network/network";
@@ -22,6 +24,11 @@ export class CharacterManager {
 
   private transformProbe: CharacterTransformProbe | null = null;
   private positionedFromUrl: boolean = false;
+  private collisionsManager: CollisionsManager;
+
+  constructor(collisionsManager: CollisionsManager) {
+    this.collisionsManager = collisionsManager;
+  }
 
   spawnCharacter(
     characterDescription: CharacterDescription,
@@ -31,29 +38,51 @@ export class CharacterManager {
   ) {
     this.characterDescription = characterDescription;
     const characterLoadingPromise = new Promise<Character>((resolve) => {
-      const character = new Character(characterDescription, id, isLocal, () => {
-        const spawnPosition = getSpawnPositionInsideCircle(7, 30, id);
-        character.model!.mesh!.position.set(spawnPosition.x, spawnPosition.y, spawnPosition.z);
-        character.model!.hideMaterialByMeshName("SK_UE5Mannequin_1");
-        group.add(character.model!.mesh!);
+      const character = new Character(
+        characterDescription,
+        id,
+        isLocal,
+        () => {
+          const spawnPosition = getSpawnPositionInsideCircle(7, 30, id);
+          character.model!.mesh!.position.set(spawnPosition.x, spawnPosition.y, spawnPosition.z);
+          character.model!.hideMaterialByMeshName("SK_UE5Mannequin_1");
+          group.add(character.model!.mesh!);
 
-        if (isLocal) {
-          this.character = character;
-        } else {
-          this.remoteCharacters.set(id, character);
-          const remoteController = new RemoteController(character, id);
-          remoteController.setAnimationFromFile("idle", characterDescription.idleAnimationFileUrl);
-          remoteController.setAnimationFromFile("walk", characterDescription.jogAnimationFileUrl);
-          remoteController.setAnimationFromFile("run", characterDescription.sprintAnimationFileUrl);
-          this.remoteCharacterControllers.set(id, remoteController);
-        }
+          if (isLocal) {
+            this.character = character;
+          } else {
+            this.remoteCharacters.set(id, character);
+            const remoteController = new RemoteController(character, id);
+            remoteController.setAnimationFromFile(
+              "idle",
+              characterDescription.idleAnimationFileUrl,
+            );
+            remoteController.setAnimationFromFile("walk", characterDescription.jogAnimationFileUrl);
+            remoteController.setAnimationFromFile(
+              "run",
+              characterDescription.sprintAnimationFileUrl,
+            );
+            this.remoteCharacterControllers.set(id, remoteController);
+          }
 
-        resolve(character);
-      });
+          resolve(character);
+        },
+        this.collisionsManager,
+      );
     });
 
     this.loadingCharacters.set(id, characterLoadingPromise);
     return characterLoadingPromise;
+  }
+
+  getLocalCharacterPositionAndRotation(): ScenePosition | null {
+    if (this.character && this.character.model && this.character.model.mesh) {
+      return {
+        location: this.character.model.mesh.position,
+        orientation: this.character.model.mesh.rotation,
+      };
+    }
+    return null;
   }
 
   update(

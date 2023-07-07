@@ -9,8 +9,8 @@ import {
   CoreMMLScene,
   RunTimeManager,
   Network,
-  CollisionsStore,
 } from "@mml-playground/core";
+import { CollisionsManager } from "@mml-playground/core/src";
 import { Scene, Fog, PerspectiveCamera, Group } from "three";
 
 import { Environment } from "./environment";
@@ -28,7 +28,7 @@ export class App {
   private cameraManager: CameraManager;
   private composer: Composer;
   private network: Network;
-  private collisionsStore = CollisionsStore;
+  private collisionsManager: CollisionsManager;
 
   private modelsPath: string = "/assets/models";
   private characterDescription: CharacterDescription | null = null;
@@ -40,18 +40,35 @@ export class App {
 
     this.runTime = new RunTimeManager();
     this.inputManager = new InputManager();
-    this.characterManager = new CharacterManager();
     this.cameraManager = new CameraManager();
     this.camera = this.cameraManager.camera;
     this.composer = new Composer(this.scene, this.camera);
     this.network = new Network();
-    this.collisionsStore.setScene(this.scene);
+    this.collisionsManager = new CollisionsManager(this.scene);
+    this.characterManager = new CharacterManager(this.collisionsManager);
 
-    new CoreMMLScene(this.group, document.body, this.composer.renderer, this.scene, this.camera);
+    new CoreMMLScene(
+      this.group,
+      document.body,
+      this.composer.renderer,
+      this.scene,
+      this.camera,
+      this.collisionsManager,
+      () => {
+        const characterPosition = this.characterManager.getLocalCharacterPositionAndRotation();
+        if (characterPosition) {
+          return characterPosition;
+        }
+        return {
+          location: { x: 0, y: 0, z: 0 },
+          orientation: { x: 0, y: 0, z: 0 },
+        };
+      },
+    );
 
     new Environment(this.scene, this.composer.renderer, (modelGroup) => this.group.add(modelGroup));
     new Room((modelGroup) => {
-      this.collisionsStore.addMeshesGroup(modelGroup);
+      this.collisionsManager.addMeshesGroup(modelGroup);
       this.group.add(modelGroup);
     });
     new Lights((subGroup) => this.group.add(subGroup));

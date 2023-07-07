@@ -1,5 +1,7 @@
 import { Color, Vector3 } from "three";
 
+import { CollisionsManager } from "../collisions/collisions-manager";
+
 import { CharacterModel } from "./character-model";
 import { LocalController } from "./controller-local";
 
@@ -15,6 +17,7 @@ export type AnimationTypes = "idle" | "walk" | "run";
 
 export class Character {
   public debug = false;
+  private collisionsManager: CollisionsManager;
   private characterDescription: CharacterDescription;
   private modelLoadedCallback: () => void;
 
@@ -33,11 +36,13 @@ export class Character {
     id: number,
     isLocal: boolean,
     modelLoadedCallback: () => void,
+    collisionsManager: CollisionsManager,
   ) {
     this.characterDescription = characterDescription;
     this.id = id;
     this.isLocal = isLocal;
     this.modelLoadedCallback = modelLoadedCallback;
+    this.collisionsManager = collisionsManager;
     this.load();
   }
 
@@ -46,7 +51,7 @@ export class Character {
     await this.model.init();
     this.color = this.model.material.colorsCube216[this.id];
     if (this.isLocal) {
-      this.controller = new LocalController(this.model, this.id);
+      this.controller = new LocalController(this.model, this.id, this.collisionsManager);
     }
     this.modelLoadedCallback();
   }

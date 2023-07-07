@@ -1,7 +1,7 @@
 import { Box3, Line3, Matrix4, PerspectiveCamera, Quaternion, Vector2, Vector3 } from "three";
 
 import { CameraManager } from "../camera/camera-manager";
-import { CollisionsStore } from "../collisions/collisions-manager";
+import { CollisionsManager } from "../collisions/collisions-manager";
 import { anyTruthness } from "../helpers/js-helpers";
 import { ease } from "../helpers/math-helpers";
 import { InputManager } from "../input/input-manager";
@@ -15,6 +15,7 @@ export type AnimationTypes = "idle" | "walk" | "run";
 export class LocalController {
   public id: number = 0;
   private model: CharacterModel | null = null;
+  private collisionsManager: CollisionsManager;
 
   public capsuleInfo = {
     radius: 0.4,
@@ -36,7 +37,6 @@ export class LocalController {
   private tempSegment: Line3 = new Line3();
   private tempVector: Vector3 = new Vector3();
   private tempVector2: Vector3 = new Vector3();
-  private lastIntersectedTriangleNormal: Vector3 = new Vector3();
 
   private jumpInput: boolean = false;
   private jumpForce: number = 10;
@@ -67,9 +67,10 @@ export class LocalController {
     state: "idle",
   };
 
-  constructor(model: CharacterModel, id: number) {
+  constructor(model: CharacterModel, id: number, collisionsManager: CollisionsManager) {
     this.id = id;
     this.model = model;
+    this.collisionsManager = collisionsManager;
   }
 
   getTargetAnimation(): AnimationTypes {
@@ -123,9 +124,8 @@ export class LocalController {
   }
 
   updatePosition(deltaTime: number, _iter: number): void {
-    if (!CollisionsStore.mergedMesh || !this.model?.mesh) return;
+    if (!this.model?.mesh) return;
     const { forward, backward, left, right } = this.inputDirections;
-    const worldCollider = CollisionsStore.mergedMesh;
 
     this.targetSpeed = this.runInput ? 14 : 8;
     this.speed += ease(this.targetSpeed, this.speed, 0.07);
@@ -168,7 +168,6 @@ export class LocalController {
     this.model.mesh.updateMatrixWorld();
 
     this.tempBox.makeEmpty();
-    this.tempMatrix.copy(worldCollider.matrixWorld).invert();
 
     this.tempSegment.copy(this.capsuleInfo.segment!);
     this.tempSegment.start.applyMatrix4(this.model.mesh.matrixWorld).applyMatrix4(this.tempMatrix);
@@ -180,25 +179,10 @@ export class LocalController {
     this.tempBox.min.subScalar(this.capsuleInfo.radius!);
     this.tempBox.max.addScalar(this.capsuleInfo.radius!);
 
-    worldCollider.geometry.boundsTree!.shapecast({
-      intersectsBounds: (box) => box.intersectsBox(this.tempBox),
-      intersectsTriangle: (tri) => {
-        const triPoint = this.tempVector;
-        const capsulePoint = this.tempVector2;
-        const distance = tri.closestPointToSegment(this.tempSegment, triPoint, capsulePoint);
-        if (distance < this.capsuleInfo.radius!) {
-          const depth = this.capsuleInfo.radius! - distance;
-          const direction = capsulePoint.sub(triPoint).normalize();
-          this.tempSegment.start.addScaledVector(direction, depth);
-          this.tempSegment.end.addScaledVector(direction, depth);
-
-          tri.getNormal(this.lastIntersectedTriangleNormal);
-        }
-      },
-    });
+    this.collisionsManager.applyColliders(this.tempSegment, this.capsuleInfo.radius!, this.tempBox);
 
     const newPosition = this.tempVector;
-    newPosition.copy(this.tempSegment.start).applyMatrix4(worldCollider.matrixWorld);
+    newPosition.copy(this.tempSegment.start);
 
     const deltaVector = this.tempVector2;
     deltaVector.subVectors(newPosition, this.model.mesh.position);
