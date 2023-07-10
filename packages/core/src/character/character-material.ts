@@ -1,40 +1,42 @@
 import { Color, CubeTexture, MeshPhysicalMaterial, UniformsUtils } from "three";
 
-import { injectBefore, injectBeforeMain, injectInsideMain } from "../../utils/webgl/shader-helpers";
-import { bayerDither } from "../../utils/webgl/shaderchunks/bayer-dither";
-import { TUniforms } from "../../utils/webgl/types";
+import { bayerDither } from "../rendering/shaders/bayer-dither";
+import {
+  injectBefore,
+  injectBeforeMain,
+  injectInsideMain,
+} from "../rendering/shaders/shader-helpers";
 
-export class MaterialManager {
-  public standardMaterial: MeshPhysicalMaterial;
-  public standardMaterialUniforms: TUniforms = {};
+type TUniform<TValue = any> = { value: TValue };
 
+export class CharacterMaterial extends MeshPhysicalMaterial {
+  public uniforms: Record<string, TUniform> = {};
   public envTexture: CubeTexture | null = null;
-
   public colorsCube216: Color[] = [];
 
   constructor() {
-    this.standardMaterial = new MeshPhysicalMaterial({
-      color: 0xffffff,
-      transmission: 0.5,
-      metalness: 0.1,
-      roughness: 0.3,
-      ior: 2.0,
-      thickness: 0.1,
-      specularColor: new Color(0x0077ff),
-      specularIntensity: 0.1,
-      envMapIntensity: 1.8,
-      sheenColor: new Color(0x770077),
-      sheen: 0.35,
-    });
-    this.standardMaterial.onBeforeCompile = (shader) => {
-      this.standardMaterialUniforms = UniformsUtils.clone(shader.uniforms);
-      this.standardMaterialUniforms.nearClip = { value: 0.01 };
-      this.standardMaterialUniforms.farClip = { value: 1000.0 };
-      this.standardMaterialUniforms.ditheringNear = { value: 0.25 };
-      this.standardMaterialUniforms.ditheringRange = { value: 0.5 };
-      this.standardMaterialUniforms.time = { value: 0.0 };
-      this.standardMaterialUniforms.diffuseRandomColor = { value: new Color() };
-      shader.uniforms = this.standardMaterialUniforms;
+    super();
+    this.color = new Color(0xffffff);
+    this.transmission = 0.5;
+    this.metalness = 0.5;
+    this.roughness = 0.3;
+    this.ior = 2.0;
+    this.thickness = 0.1;
+    this.specularColor = new Color(0x0077ff);
+    this.specularIntensity = 0.1;
+    this.envMapIntensity = 1.8;
+    this.sheenColor = new Color(0x770077);
+    this.sheen = 0.35;
+
+    this.onBeforeCompile = (shader) => {
+      this.uniforms = UniformsUtils.clone(shader.uniforms);
+      this.uniforms.nearClip = { value: 0.01 };
+      this.uniforms.farClip = { value: 1000.0 };
+      this.uniforms.ditheringNear = { value: 0.25 };
+      this.uniforms.ditheringRange = { value: 0.5 };
+      this.uniforms.time = { value: 0.0 };
+      this.uniforms.diffuseRandomColor = { value: new Color() };
+      shader.uniforms = this.uniforms;
 
       shader.vertexShader = injectBeforeMain(shader.vertexShader, "varying vec2 vUv;");
       shader.vertexShader = injectInsideMain(shader.vertexShader, "vUv = uv;");
@@ -99,10 +101,6 @@ export class MaterialManager {
 
   setEnvTexture(cubeTexture: CubeTexture): void {
     this.envTexture = cubeTexture;
-    this.standardMaterial.transmissionMap = this.envTexture;
-  }
-
-  dispose() {
-    this.standardMaterial.dispose();
+    this.transmissionMap = this.envTexture;
   }
 }

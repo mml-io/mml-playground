@@ -41,7 +41,7 @@ export class RemoteController {
   constructor(character: Character, id: number) {
     this.id = id;
     this.character = character;
-    this.characterModel = this.character.model;
+    this.characterModel = this.character.model!.mesh!;
     this.animationMixer = new AnimationMixer(this.characterModel);
   }
 
