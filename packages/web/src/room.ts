@@ -1,5 +1,4 @@
 import {
-  BoxGeometry,
   CircleGeometry,
   FrontSide,
   Group,
@@ -21,23 +20,10 @@ export class Room {
   private floorMaterial: MeshStandardMaterial | null = null;
   private floorMesh: Mesh | null = null;
 
-  private rampGeometry: BoxGeometry;
-  private rampMaterial: MeshStandardMaterial;
-  private rampMesh: Mesh;
-
   public group: Group = new Group();
 
   constructor(onLoadCallback: (group: Group) => void) {
     this.onLoadCallback = onLoadCallback;
-
-    this.rampGeometry = new BoxGeometry(4, 15, 0.5);
-    this.rampMaterial = new MeshStandardMaterial({ color: 0xffffff });
-    this.rampMesh = new Mesh(this.rampGeometry, this.rampMaterial);
-    this.rampMesh.position.set(0, 2.09, -15);
-    this.rampMesh.rotation.x = Math.PI * 0.6;
-    this.rampMesh.castShadow = true;
-    this.rampMesh.receiveShadow = true;
-    this.group.add(this.rampMesh);
 
     this.floorTexture = new TextureLoader(new LoadingManager()).load(
       "/assets/textures/checker.png",

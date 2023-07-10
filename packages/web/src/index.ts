@@ -87,16 +87,6 @@ export class App {
     this.update = this.update.bind(this);
   }
 
-  traverse(group: Group | Scene) {
-    group.traverse((child) => {
-      if (child.type === "Mesh") {
-        console.log(child);
-      } else if (child.type === "Group") {
-        console.log(child);
-      }
-    });
-  }
-
   async init() {
     this.scene.add(this.group);
 

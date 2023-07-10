@@ -79,7 +79,6 @@ export class RemoteController {
   }
 
   transitionToAnimation(targetAnimation: string, transitionDuration: number = 0.21): void {
-    console.log(targetAnimation);
     if (this.currentAnimation === targetAnimation) return;
 
     const currentAction = this.animations[this.currentAnimation];

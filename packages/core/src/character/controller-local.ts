@@ -17,6 +17,8 @@ export class LocalController {
   private model: CharacterModel | null = null;
   private collisionsManager: CollisionsManager;
 
+  private collisionDetectionSteps = 15;
+
   public capsuleInfo = {
     radius: 0.4,
     segment: new Line3(new Vector3(), new Vector3(0, 1.05, 0)),
@@ -248,8 +250,8 @@ export class LocalController {
 
     if (anyTruthness(this.inputDirections)) this.updateRotation();
 
-    for (let i = 0; i < 15; i++) {
-      this.updatePosition(runTime.smoothDeltaTime / 15, i);
+    for (let i = 0; i < this.collisionDetectionSteps; i++) {
+      this.updatePosition(runTime.smoothDeltaTime / this.collisionDetectionSteps, i);
     }
 
     if (this.model.mesh.position.y < 0) this.resetPosition();
