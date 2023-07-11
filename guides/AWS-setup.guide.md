@@ -29,7 +29,7 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
 After having nvm installed, you can install the latest LTS version of Node by running the following command:
 
 ```bash
-nvm install –lts
+nvm install v16
 ```
 
 ## Cloning the MML Playground
