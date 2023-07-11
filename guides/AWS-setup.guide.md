@@ -64,7 +64,13 @@ There are a few extra steps so you can access your Playground. The first one is 
 
 The second one is to allow the connections to port 8080 (which is the port the Playground uses to receive incoming connections). To do so, you can do to your Instances tab, click on the three dots of your instance, click on Manage, go to the Networking tab, and add a new Custom Firewall rule to allow TCP connections to port `8080` (please see the screenshots below).
 
-With your static IP set and your playground running, you can test it by going to:
+![manage instance 1](https://raw.githubusercontent.com/mml-io/mml-playground/guides/guides/manage-instance_1.png)
+
+![manage instance 2](https://raw.githubusercontent.com/mml-io/mml-playground/guides/guides/manage-instance_2.png)
+
+![firewall](https://raw.githubusercontent.com/mml-io/mml-playground/guides/guides/firewall.png)
+
+With your static IP set, your firewall rules updated, and your playground running, you can test it by going to:
 
 `http://<your_static_ip>:8080`
 
