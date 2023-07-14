@@ -1,15 +1,20 @@
-import { Vector2, Vector3 } from "three";
 import WebSocket from "ws";
 
-import { CharacterNetworkCodec } from "./character-network-codec";
 import { heartBeatRate, packetsUpdateRate, pingPongRate } from "./character-network-settings";
-import { Client, ClientUpdate } from "./types";
+import {
+  AnimationState,
+  CharacterNetworkClientUpdate,
+  CharacterNetworkCodec,
+} from "./CharacterNetworkCodec";
 
-class CharacterNetworkServer {
-  codec: CharacterNetworkCodec = new CharacterNetworkCodec();
+export type Client = {
+  socket: WebSocket;
+  update: CharacterNetworkClientUpdate;
+};
 
-  clients: Map<number, Client> = new Map();
-  clientLastPong: Map<number, number> = new Map();
+export class CharacterNetworkServer {
+  private clients: Map<number, Client> = new Map();
+  private clientLastPong: Map<number, number> = new Map();
 
   constructor() {
     setInterval(this.sendPlayerUpdates.bind(this), packetsUpdateRate);
@@ -59,12 +64,17 @@ class CharacterNetworkServer {
     }
 
     for (const { update } of this.clients.values()) {
-      socket.send(this.codec.encodeUpdate(update));
+      socket.send(CharacterNetworkCodec.encodeUpdate(update));
     }
 
     this.clients.set(id, {
       socket: socket as WebSocket,
-      update: { id, position: new Vector3(), rotation: new Vector2(), state: "idle" },
+      update: {
+        id,
+        position: { x: 0, y: 0, z: 0 },
+        rotation: { quaternionY: 0, quaternionW: 0 },
+        state: AnimationState.idle,
+      },
     });
 
     socket.on("message", (message: WebSocket.Data, _isBinary: boolean) => {
@@ -72,7 +82,7 @@ class CharacterNetworkServer {
 
       if (message instanceof Buffer) {
         const arrayBuffer = new Uint8Array(message).buffer;
-        update = this.codec.decodeUpdate(arrayBuffer);
+        update = CharacterNetworkCodec.decodeUpdate(arrayBuffer);
       } else {
         try {
           const data = JSON.parse(message as string);
@@ -112,18 +122,16 @@ class CharacterNetworkServer {
   }
 
   sendPlayerUpdates(): void {
-    const updates: ClientUpdate[] = [];
+    const updates: CharacterNetworkClientUpdate[] = [];
     this.clients.forEach((client) => {
       updates.push(client.update);
     });
 
     for (const update of updates) {
-      const encodedUpdate = this.codec.encodeUpdate(update);
+      const encodedUpdate = CharacterNetworkCodec.encodeUpdate(update);
       this.clients.forEach((client) => {
         client.socket.send(encodedUpdate);
       });
     }
   }
 }
-
-export { CharacterNetworkServer };

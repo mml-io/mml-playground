@@ -1,10 +1,8 @@
 import esbuild from "esbuild";
 import { copy } from "esbuild-plugin-copy";
-import { htmlPlugin } from "@craftamap/esbuild-plugin-html";
 
 const config = {
   entryPoints: ["src/index.ts"],
-  entryNames: "[dir]/[name]-[hash]",
   assetNames: "[dir]/[name]-[hash]",
   bundle: true,
   outdir: "./dist",
@@ -26,15 +24,6 @@ const config = {
         to: ["./dist/"],
         keepStructure: true,
       },
-    }),
-    htmlPlugin({
-      files: [
-        {
-          entryPoints: ["src/index.ts"],
-          filename: "index.html",
-          htmlTemplate: "./public/index.html",
-        },
-      ],
     }),
   ],
 };

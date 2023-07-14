@@ -3,8 +3,6 @@
     <m-group id="slots"> </m-group>
 
     <script>
-      //{PLAYGROUND_RUNTIME_CONSTANTS}
-
       const DOCUMENT_LIFETIME_DURATION_S = 60 * 20;
 
       const SLOT_WIDTH = 12;
@@ -24,25 +22,25 @@
         {
           x: -20,
           z: (SLOT_DEPTH + SPACE_BETWEEN_SLOTS) * 0,
-          documentUrl: `${EXAMPLES_HOST_URL}/duck.html`,
+          documentUrl: `${window.params.EXAMPLES_HOST_URL}/duck.html`,
           title: "The Duck",
         },
         {
           x: -20,
           z: (SLOT_DEPTH + SPACE_BETWEEN_SLOTS) * 1,
-          documentUrl: `${EXAMPLES_HOST_URL}/dice.html`,
+          documentUrl: `${window.params.EXAMPLES_HOST_URL}/dice.html`,
           title: "The Dice",
         },
         {
           x: -20,
           z: (SLOT_DEPTH + SPACE_BETWEEN_SLOTS) * 2,
-          documentUrl: `${EXAMPLES_HOST_URL}/videoplayer.html`,
+          documentUrl: `${window.params.EXAMPLES_HOST_URL}/videoplayer.html`,
           title: "Video Player",
         },
         {
           x: -20,
           z: (SLOT_DEPTH + SPACE_BETWEEN_SLOTS) * 3,
-          documentUrl: `${EXAMPLES_HOST_URL}/weather.html`,
+          documentUrl: `${window.params.EXAMPLES_HOST_URL}/weather.html`,
           title: "Weather API",
         },
       ];

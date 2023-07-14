@@ -1,22 +1,15 @@
-import { type AnimationState, type ClientUpdate } from "@mml-playground/character-network";
-import { Box3, Line3, Matrix4, PerspectiveCamera, Quaternion, Vector2, Vector3 } from "three";
+import { AnimationState, CharacterNetworkClientUpdate } from "@mml-playground/character-network";
+import { Box3, Line3, Matrix4, PerspectiveCamera, Quaternion, Vector3 } from "three";
 
-import { CameraManager } from "../camera/camera-manager";
-import { CollisionsManager } from "../collisions/collisions-manager";
-import { anyTruthness } from "../helpers/js-helpers";
+import { CameraManager } from "../camera/CameraManager";
+import { CollisionsManager } from "../collisions/CollisionsManager";
 import { ease } from "../helpers/math-helpers";
-import { InputManager } from "../input/input-manager";
-import { RunTimeManager } from "../runtime/runtime-manager";
+import { KeyInputManager } from "../input/KeyInputManager";
+import { RunTimeManager } from "../runtime/RunTimeManager";
 
-import { CharacterModel } from "./character-model";
-
-export type AnimationTypes = "idle" | "walk" | "run";
+import { CharacterModel } from "./CharacterModel";
 
 export class LocalController {
-  public id: number = 0;
-  private model: CharacterModel | null = null;
-  private collisionsManager: CollisionsManager;
-
   private collisionDetectionSteps = 15;
 
   public capsuleInfo = {
@@ -27,14 +20,12 @@ export class LocalController {
   private characterOnGround: boolean = false;
   private characterVelocity: Vector3 = new Vector3();
   private gravity = -20;
-
   private upVector: Vector3 = new Vector3(0, 1, 0);
 
   private rotationOffset: number = 0;
   private azimuthalAngle: number = 0;
 
   private tempBox: Box3 = new Box3();
-
   private tempMatrix: Matrix4 = new Matrix4();
   private tempSegment: Line3 = new Line3();
   private tempVector: Vector3 = new Vector3();
@@ -62,30 +53,72 @@ export class LocalController {
   private speed: number = 0;
   private targetSpeed: number = 0;
 
-  public networkState: ClientUpdate = {
+  public networkState: CharacterNetworkClientUpdate = {
     id: 0,
-    position: new Vector3(),
-    rotation: new Vector2(),
-    state: "idle",
+    position: { x: 0, y: 0, z: 0 },
+    rotation: { quaternionY: 0, quaternionW: 0 },
+    state: AnimationState.idle,
   };
 
-  constructor(model: CharacterModel, id: number, collisionsManager: CollisionsManager) {
-    this.id = id;
-    this.model = model;
-    this.collisionsManager = collisionsManager;
+  constructor(
+    private readonly model: CharacterModel,
+    private readonly id: number,
+    private readonly collisionsManager: CollisionsManager,
+    private readonly keyInputManager: KeyInputManager,
+    private readonly cameraManager: CameraManager,
+    private readonly runTimeManager: RunTimeManager,
+  ) {}
+
+  public update(): void {
+    if (!this.model?.mesh || !this.model?.animationMixer) return;
+    if (!this.thirdPersonCamera) this.thirdPersonCamera = this.cameraManager.camera;
+
+    const movementKeysPressed = this.keyInputManager.isMovementKeyPressed();
+    const forward = this.keyInputManager.isKeyPressed("w");
+    const backward = this.keyInputManager.isKeyPressed("s");
+    const left = this.keyInputManager.isKeyPressed("a");
+    const right = this.keyInputManager.isKeyPressed("d");
+
+    this.inputDirections = { forward, backward, left, right };
+    this.jumpInput = this.keyInputManager.isJumping();
+    this.runInput = this.keyInputManager.isShiftPressed();
+
+    if (movementKeysPressed) {
+      const targetAnimation = this.getTargetAnimation();
+      this.model.updateAnimation(targetAnimation, this.runTimeManager.smoothDeltaTime);
+    } else {
+      this.model.updateAnimation(AnimationState.idle, this.runTimeManager.smoothDeltaTime);
+    }
+
+    if (Object.values(this.inputDirections).some((v) => v)) {
+      this.updateRotation();
+    }
+
+    for (let i = 0; i < this.collisionDetectionSteps; i++) {
+      this.updatePosition(this.runTimeManager.smoothDeltaTime / this.collisionDetectionSteps, i);
+    }
+
+    if (this.model.mesh.position.y < 0) {
+      this.resetPosition();
+    }
+    this.updateNetworkState();
   }
 
-  getTargetAnimation(): AnimationTypes {
+  private getTargetAnimation(): AnimationState {
     const { forward, backward, left, right } = this.inputDirections;
     const hasAnyDirection = forward || backward || left || right;
     const isRunning = this.runInput && hasAnyDirection;
     const conflictingDirections = (forward && backward) || (left && right);
 
-    if (conflictingDirections) return "idle";
-    return hasAnyDirection ? (isRunning ? "run" : "walk") : "idle";
+    if (conflictingDirections) return AnimationState.idle;
+    return hasAnyDirection
+      ? isRunning
+        ? AnimationState.running
+        : AnimationState.walking
+      : AnimationState.idle;
   }
 
-  updateRotationOffset(): void {
+  private updateRotationOffset(): void {
     const { forward, backward, left, right } = this.inputDirections;
     if ((left && right) || (forward && backward)) return;
     if (forward) {
@@ -103,7 +136,7 @@ export class LocalController {
     }
   }
 
-  updateAzimuthalAngle(): void {
+  private updateAzimuthalAngle(): void {
     if (!this.thirdPersonCamera || !this.model?.mesh) return;
     this.azimuthalAngle = Math.atan2(
       this.thirdPersonCamera.position.x - this.model.mesh.position.x,
@@ -111,7 +144,7 @@ export class LocalController {
     );
   }
 
-  updateRotation(): void {
+  private updateRotation(): void {
     if (!this.thirdPersonCamera || !this.model?.mesh) return;
     this.updateRotationOffset();
     this.updateAzimuthalAngle();
@@ -120,12 +153,12 @@ export class LocalController {
     this.model.mesh.quaternion.rotateTowards(rotationQuaternion, 0.07);
   }
 
-  addScaledVectorToCharacter(deltaTime: number) {
+  private addScaledVectorToCharacter(deltaTime: number) {
     if (!this.model?.mesh) return;
     this.model.mesh.position.addScaledVector(this.tempVector, this.speed * deltaTime);
   }
 
-  updatePosition(deltaTime: number, _iter: number): void {
+  private updatePosition(deltaTime: number, _iter: number): void {
     if (!this.model?.mesh) return;
     const { forward, backward, left, right } = this.inputDirections;
 
@@ -204,7 +237,7 @@ export class LocalController {
     }
   }
 
-  updateNetworkState(): void {
+  private updateNetworkState(): void {
     if (!this.model?.mesh) return;
     const characterQuaternion = this.model.mesh.getWorldQuaternion(new Quaternion());
     const positionUpdate = new Vector3(
@@ -212,51 +245,18 @@ export class LocalController {
       this.model.mesh.position.y,
       this.model.mesh.position.z,
     );
-    const rotationUpdate = new Vector2(characterQuaternion?.y, characterQuaternion?.w);
     this.networkState = {
       id: this.id,
       position: positionUpdate,
-      rotation: rotationUpdate,
+      rotation: { quaternionY: characterQuaternion?.y, quaternionW: characterQuaternion?.w },
       state: this.model.currentAnimation as AnimationState,
     };
   }
 
-  resetPosition(): void {
+  private resetPosition(): void {
     if (!this.model?.mesh) return;
     this.characterVelocity.y = 0;
     this.model.mesh.position.y = 5;
     this.characterOnGround = false;
-  }
-
-  update(inputManager: InputManager, cameraManager: CameraManager, runTime: RunTimeManager): void {
-    if (!this.model?.mesh || !this.model?.animationMixer) return;
-    if (!this.thirdPersonCamera) this.thirdPersonCamera = cameraManager.camera;
-
-    const movementKeysPressed = inputManager.isMovementKeyPressed();
-    const forward = inputManager.isKeyPressed("w");
-    const backward = inputManager.isKeyPressed("s");
-    const left = inputManager.isKeyPressed("a");
-    const right = inputManager.isKeyPressed("d");
-
-    this.jumpInput = inputManager.isJumping();
-
-    this.inputDirections = { forward, backward, left, right };
-    this.runInput = inputManager.isShiftPressed();
-
-    if (movementKeysPressed) {
-      const targetAnimation = this.getTargetAnimation();
-      this.model.updateAnimation(targetAnimation, runTime.smoothDeltaTime);
-    } else {
-      this.model.updateAnimation("idle", runTime.smoothDeltaTime);
-    }
-
-    if (anyTruthness(this.inputDirections)) this.updateRotation();
-
-    for (let i = 0; i < this.collisionDetectionSteps; i++) {
-      this.updatePosition(runTime.smoothDeltaTime / this.collisionDetectionSteps, i);
-    }
-
-    if (this.model.mesh.position.y < 0) this.resetPosition();
-    this.updateNetworkState();
   }
 }

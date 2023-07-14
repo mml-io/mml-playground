@@ -1,8 +1,8 @@
-export { CameraManager } from "./camera/camera-manager";
-export { CharacterDescription } from "./character/character";
-export { CharacterManager } from "./character/character-manager";
-export { InputManager } from "./input/input-manager";
-export { CoreMMLScene } from "./mml/core-mml-scene";
+export { CameraManager } from "./camera/CameraManager";
+export { CharacterDescription } from "./character/Character";
+export { CharacterManager } from "./character/CharacterManager";
+export { KeyInputManager } from "./input/KeyInputManager";
+export { CoreMMLScene } from "./mml/CoreMMLScene";
 export { Composer } from "./rendering/composer";
-export { RunTimeManager } from "./runtime/runtime-manager";
-export { CollisionsManager } from "./collisions/collisions-manager";
+export { RunTimeManager } from "./runtime/RunTimeManager";
+export { CollisionsManager } from "./collisions/CollisionsManager";

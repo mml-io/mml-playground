@@ -29,6 +29,7 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  overflow: hidden;
 }
 
 h1 {
@@ -54,49 +55,4 @@ h1 {
   button {
     background-color: #f9f9f9;
   }
-}
-
-.network-overlay {
-  position: fixed;
-  font-family: monospace;
-  top: 21px;
-  left: 21px;
-  background-color: rgba(0, 0, 0, 0.8);
-  padding: 12px;
-  border-radius: 5px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.5);
-  color: white;
-}
-
-.network-overlay table {
-  border-collapse: collapse;
-}
-
-.network-overlay td,
-th {
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  padding: 0px 5px;
-  margin: 0px;
-}
-
-.network-overlay th {
-  background: rgba(0, 0, 0, 0);
-}
-
-.network-overlay tr:nth-child(even) {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.network-overlay tr:nth-child(odd) {
-  background-color: rgba(0, 0, 0, 0.2);
-}
-
-.network-overlay .location,
-.rotation {
-  width: 300px; /* adjust as needed */
-}
-
-.network-overlay .state {
-  width: 90px; /* adjust as needed */
 }

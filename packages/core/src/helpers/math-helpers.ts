@@ -1,18 +1,5 @@
 import { Vector3 } from "three";
 
-export const getSpawnPositionAroundCircle = (
-  radius: number,
-  positions: number,
-  id: number,
-  yPos: number = 0,
-): Vector3 => {
-  const angleStep = (2 * Math.PI) / positions;
-  const angle = id % 2 === 0 ? (id / 2) * angleStep : 2 * Math.PI - Math.floor(id / 2) * angleStep;
-  const x = radius * Math.cos(angle - Math.PI / 2);
-  const z = radius * Math.sin(angle - Math.PI / 2);
-  return new Vector3(x, yPos, z);
-};
-
 export const getSpawnPositionInsideCircle = (
   radius: number,
   positions: number,

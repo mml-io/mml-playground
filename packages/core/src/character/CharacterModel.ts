@@ -1,3 +1,4 @@
+import { AnimationState } from "@mml-playground/character-network/src";
 import {
   AnimationAction,
   AnimationClip,
@@ -8,38 +9,47 @@ import {
   Object3D,
 } from "three";
 
-import { CharacterDescription } from "./character";
-import { CharacterMaterial } from "./character-material";
-import { ModelLoader } from "./model-loader";
-
-export type AnimationType = "idle" | "walk" | "run";
+import { CharacterDescription } from "./Character";
+import { CharacterMaterial } from "./CharacterMaterial";
+import { ModelLoader } from "./ModelLoader";
 
 export class CharacterModel {
-  private characterDescription: CharacterDescription;
   private modelLoader: ModelLoader = new ModelLoader();
 
   public mesh: Object3D | null = null;
-  public animations: Record<string, AnimationAction> = {};
-  public animationMixer: AnimationMixer | null = null;
-
   public material: CharacterMaterial = new CharacterMaterial();
 
-  public currentAnimation: AnimationType = "idle";
+  public animations: Record<string, AnimationAction> = {};
+  public animationMixer: AnimationMixer | null = null;
+  public currentAnimation: AnimationState = AnimationState.idle;
 
-  constructor(characterDescription: CharacterDescription) {
-    this.characterDescription = characterDescription;
+  constructor(private readonly characterDescription: CharacterDescription) {}
+
+  public async init(): Promise<void> {
+    await this.loadMainMesh();
+    await this.setAnimationFromFile(
+      this.characterDescription.idleAnimationFileUrl,
+      AnimationState.idle,
+    );
+    await this.setAnimationFromFile(
+      this.characterDescription.jogAnimationFileUrl,
+      AnimationState.walking,
+    );
+    await this.setAnimationFromFile(
+      this.characterDescription.sprintAnimationFileUrl,
+      AnimationState.running,
+    );
+    this.applyMaterialToAllSkinnedMeshes(this.material);
   }
 
-  setShadows(mesh: Object3D, castShadow: boolean = true, receiveShadow: boolean = true): void {
-    mesh.traverse((child: Object3D) => {
-      if (child.type === "SkinnedMesh") {
-        child.castShadow = castShadow;
-        child.receiveShadow = receiveShadow;
-      }
-    });
+  public updateAnimation(targetAnimation: AnimationState, deltaTime: number) {
+    if (this.currentAnimation !== targetAnimation) {
+      this.transitionToAnimation(targetAnimation);
+    }
+    this.animationMixer?.update(deltaTime);
   }
 
-  hideMaterialByMeshName(meshName: any): void {
+  public hideMaterialByMeshName(meshName: any): void {
     if (!this.mesh) return;
     this.mesh.traverse((child: Object3D) => {
       if (child.type === "SkinnedMesh" && child.name === meshName) {
@@ -52,7 +62,20 @@ export class CharacterModel {
     });
   }
 
-  applyMaterialToAllSkinnedMeshes(material: any): void {
+  private setShadows(
+    mesh: Object3D,
+    castShadow: boolean = true,
+    receiveShadow: boolean = true,
+  ): void {
+    mesh.traverse((child: Object3D) => {
+      if (child.type === "SkinnedMesh") {
+        child.castShadow = castShadow;
+        child.receiveShadow = receiveShadow;
+      }
+    });
+  }
+
+  private applyMaterialToAllSkinnedMeshes(material: any): void {
     if (!this.mesh) return;
     this.mesh.traverse((child: Object3D) => {
       if (child.type === "SkinnedMesh") {
@@ -61,12 +84,12 @@ export class CharacterModel {
     });
   }
 
-  initAnimationMixer() {
+  private initAnimationMixer() {
     if (this.animationMixer !== null || this.mesh === null) return;
     this.animationMixer = new AnimationMixer(this.mesh);
   }
 
-  async loadMainMesh(): Promise<void> {
+  private async loadMainMesh(): Promise<void> {
     const mainMeshUrl = this.characterDescription.meshFileUrl;
     const scale = this.characterDescription.modelScale;
     const extension = mainMeshUrl.split(".").pop();
@@ -83,9 +106,9 @@ export class CharacterModel {
     }
   }
 
-  async setAnimationFromFile(
+  private async setAnimationFromFile(
     animationFileUrl: string,
-    animationType: AnimationType,
+    animationType: AnimationState,
   ): Promise<void> {
     return new Promise(async (resolve, reject) => {
       this.initAnimationMixer();
@@ -93,7 +116,9 @@ export class CharacterModel {
       if (typeof animation !== "undefined" && animation instanceof AnimationClip) {
         this.animations[animationType] = this.animationMixer!.clipAction(animation);
         this.animations[animationType].stop();
-        if (animationType === "idle") this.animations[animationType].play();
+        if (animationType === AnimationState.idle) {
+          this.animations[animationType].play();
+        }
         resolve();
       } else {
         reject(`failed to load ${animationType} from ${animationFileUrl}`);
@@ -101,7 +126,10 @@ export class CharacterModel {
     });
   }
 
-  transitionToAnimation(targetAnimation: AnimationType, transitionDuration: number = 0.21): void {
+  private transitionToAnimation(
+    targetAnimation: AnimationState,
+    transitionDuration: number = 0.21,
+  ): void {
     if (!this.mesh || this.currentAnimation === null) return;
 
     const currentAction = this.animations[this.currentAnimation];
@@ -121,20 +149,5 @@ export class CharacterModel {
     targetAction.fadeIn(transitionDuration);
 
     this.currentAnimation = targetAnimation;
-  }
-
-  async init(): Promise<void> {
-    await this.loadMainMesh();
-    await this.setAnimationFromFile(this.characterDescription.idleAnimationFileUrl, "idle");
-    await this.setAnimationFromFile(this.characterDescription.jogAnimationFileUrl, "walk");
-    await this.setAnimationFromFile(this.characterDescription.sprintAnimationFileUrl, "run");
-    this.applyMaterialToAllSkinnedMeshes(this.material);
-  }
-
-  updateAnimation(targetAnimation: AnimationType, deltaTime: number) {
-    if (this.currentAnimation !== targetAnimation) {
-      this.transitionToAnimation(targetAnimation);
-    }
-    this.animationMixer?.update(deltaTime);
   }
 }
