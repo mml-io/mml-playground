@@ -1,5 +1,5 @@
-import { ScenePosition } from "mml-web";
-import { Euler, Group, PerspectiveCamera, Vector3 } from "three";
+import { PositionAndRotation } from "mml-web";
+import { Group, PerspectiveCamera, Vector3 } from "three";
 
 import { CameraManager } from "../camera/camera-manager";
 import { CollisionsManager } from "../collisions/collisions-manager";
@@ -75,11 +75,11 @@ export class CharacterManager {
     return characterLoadingPromise;
   }
 
-  getLocalCharacterPositionAndRotation(): ScenePosition | null {
+  getLocalCharacterPositionAndRotation(): PositionAndRotation | null {
     if (this.character && this.character.model && this.character.model.mesh) {
       return {
-        location: this.character.model.mesh.position,
-        orientation: this.character.model.mesh.rotation,
+        position: this.character.model.mesh.position,
+        rotation: this.character.model.mesh.rotation,
       };
     }
     return null;
