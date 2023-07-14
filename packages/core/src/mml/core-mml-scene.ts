@@ -8,7 +8,7 @@ import {
   PromptProps,
   registerCustomElementsToWindow,
   setGlobalMScene,
-  ScenePosition,
+  PositionAndRotation,
 } from "mml-web";
 import { AudioListener, Group, Object3D, PerspectiveCamera, Scene, WebGLRenderer } from "three";
 
@@ -19,7 +19,7 @@ export class CoreMMLScene {
   private scene: THREE.Scene;
   private camera: THREE.Camera;
   private mmlScene: Partial<IMMLScene>;
-  private getUserPositionAndRotation: () => ScenePosition;
+  private getUserPositionAndRotation: () => PositionAndRotation;
   private promptManager: PromptManager;
   private interactionListener: InteractionListener;
   private elementsHolder: HTMLElement;
@@ -34,7 +34,7 @@ export class CoreMMLScene {
     scene: Scene,
     camera: PerspectiveCamera,
     collisionsManager: CollisionsManager,
-    getUserPositionAndRotation: () => ScenePosition,
+    getUserPositionAndRotation: () => PositionAndRotation,
   ) {
     this.scene = scene;
     this.camera = camera;
@@ -65,7 +65,7 @@ export class CoreMMLScene {
       removeCollider: (object: Object3D) => {
         this.collisionsManager.removeMeshesGroup(object as Group);
       },
-      getUserPosition: this.getUserPositionAndRotation,
+      getUserPositionAndRotation: this.getUserPositionAndRotation,
       addInteraction: (interaction: Interaction) => {
         this.interactionListener.addInteraction(interaction);
       },
@@ -81,11 +81,7 @@ export class CoreMMLScene {
     };
     setGlobalMScene(this.mmlScene as IMMLScene);
     registerCustomElementsToWindow(window);
-    this.clickTrigger = MMLClickTrigger.init(
-      document,
-      this.elementsHolder,
-      this.mmlScene as IMMLScene,
-    );
+    this.clickTrigger = MMLClickTrigger.init(document, this.mmlScene as IMMLScene);
     if (this.debug) console.log(this.clickTrigger);
   }
 
