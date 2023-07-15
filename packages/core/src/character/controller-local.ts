@@ -1,3 +1,4 @@
+import { type AnimationState, type ClientUpdate } from "@mml-playground/character-network";
 import { Box3, Line3, Matrix4, PerspectiveCamera, Quaternion, Vector2, Vector3 } from "three";
 
 import { CameraManager } from "../camera/camera-manager";
@@ -5,7 +6,6 @@ import { CollisionsManager } from "../collisions/collisions-manager";
 import { anyTruthness } from "../helpers/js-helpers";
 import { ease } from "../helpers/math-helpers";
 import { InputManager } from "../input/input-manager";
-import { type AnimationState, type ClientUpdate } from "../network";
 import { RunTimeManager } from "../runtime/runtime-manager";
 
 import { CharacterModel } from "./character-model";
@@ -64,7 +64,7 @@ export class LocalController {
 
   public networkState: ClientUpdate = {
     id: 0,
-    location: new Vector3(),
+    position: new Vector3(),
     rotation: new Vector2(),
     state: "idle",
   };
@@ -215,7 +215,7 @@ export class LocalController {
     const rotationUpdate = new Vector2(characterQuaternion?.y, characterQuaternion?.w);
     this.networkState = {
       id: this.id,
-      location: positionUpdate,
+      position: positionUpdate,
       rotation: rotationUpdate,
       state: this.model.currentAnimation as AnimationState,
     };
@@ -223,7 +223,9 @@ export class LocalController {
 
   resetPosition(): void {
     if (!this.model?.mesh) return;
+    this.characterVelocity.y = 0;
     this.model.mesh.position.y = 5;
+    this.characterOnGround = false;
   }
 
   update(inputManager: InputManager, cameraManager: CameraManager, runTime: RunTimeManager): void {

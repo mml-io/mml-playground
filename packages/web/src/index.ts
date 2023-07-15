@@ -1,5 +1,6 @@
 import "./style.css";
 
+import { CharacterNetworkClient } from "@mml-playground/character-network";
 import {
   CharacterDescription,
   CharacterManager,
@@ -8,7 +9,6 @@ import {
   InputManager,
   CoreMMLScene,
   RunTimeManager,
-  Network,
 } from "@mml-playground/core";
 import { CollisionsManager } from "@mml-playground/core/src";
 import { Scene, Fog, PerspectiveCamera, Group } from "three";
@@ -27,7 +27,7 @@ export class App {
   private characterManager: CharacterManager;
   private cameraManager: CameraManager;
   private composer: Composer;
-  private network: Network;
+  private network: CharacterNetworkClient;
   private collisionsManager: CollisionsManager;
 
   private modelsPath: string = "/assets/models";
@@ -43,7 +43,7 @@ export class App {
     this.cameraManager = new CameraManager();
     this.camera = this.cameraManager.camera;
     this.composer = new Composer(this.scene, this.camera);
-    this.network = new Network();
+    this.network = new CharacterNetworkClient();
     this.collisionsManager = new CollisionsManager(this.scene);
     this.characterManager = new CharacterManager(this.collisionsManager);
 
@@ -60,8 +60,8 @@ export class App {
           return characterPosition;
         }
         return {
-          location: { x: 0, y: 0, z: 0 },
-          orientation: { x: 0, y: 0, z: 0 },
+          position: { x: 0, y: 0, z: 0 },
+          rotation: { x: 0, y: 0, z: 0 },
         };
       },
     );

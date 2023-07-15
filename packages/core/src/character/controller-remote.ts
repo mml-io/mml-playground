@@ -1,3 +1,4 @@
+import { type AnimationState, type ClientUpdate } from "@mml-playground/character-network";
 import {
   AnimationAction,
   AnimationClip,
@@ -10,8 +11,6 @@ import {
 } from "three";
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-
-import { type AnimationState, type ClientUpdate } from "../network";
 
 import { Character } from "./character";
 
@@ -33,7 +32,7 @@ export class RemoteController {
 
   public networkState: ClientUpdate = {
     id: 0,
-    location: new Vector3(),
+    position: new Vector3(),
     rotation: new Vector2(),
     state: this.currentAnimation as AnimationState,
   };
@@ -104,12 +103,10 @@ export class RemoteController {
 
   updateFromNetwork(clientUpdate: ClientUpdate): void {
     if (!this.characterModel) return;
-    const { location, rotation, state } = clientUpdate;
-    this.characterModel.position.x = location.x;
-    this.characterModel.position.y = location.y;
-    this.characterModel.position.z = location.z;
+    const { position, rotation, state } = clientUpdate;
+    this.characterModel.position.lerp(position, 0.2);
     const rotationQuaternion = new Quaternion(0, rotation.x, 0, rotation.y);
-    this.characterModel.setRotationFromQuaternion(rotationQuaternion);
+    this.characterModel.quaternion.slerp(rotationQuaternion, 0.2);
     if (state !== this.currentAnimation) {
       this.transitionToAnimation(state);
     }
