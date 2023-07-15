@@ -5,19 +5,8 @@ import { AnimationState, ClientUpdate } from "./types";
 class CharacterNetworkClient {
   public connected: boolean = false;
   public clientUpdates: Map<number, ClientUpdate> = new Map();
-  public receivedPackets: { bytes: number; timestamp: number }[] = [];
 
   public id: number = 0;
-
-  public addReceivedPacket(bytes: number): void {
-    const timestamp = Date.now();
-    this.receivedPackets.push({ bytes, timestamp });
-
-    const oneSecondAgo = timestamp - 1000;
-    while (this.receivedPackets.length > 0 && this.receivedPackets[0].timestamp < oneSecondAgo) {
-      this.receivedPackets.shift();
-    }
-  }
 
   public connection = {
     clientId: null as number | null,
@@ -54,7 +43,6 @@ class CharacterNetworkClient {
                 }
               } else if (message.data instanceof Blob) {
                 const arrayBuffer = await new Response(message.data).arrayBuffer();
-                this.addReceivedPacket(arrayBuffer.byteLength);
                 const updates = this.decodeUpdate(arrayBuffer);
                 this.clientUpdates.set(updates.id, updates);
               } else {
