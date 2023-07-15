@@ -223,7 +223,9 @@ export class LocalController {
 
   resetPosition(): void {
     if (!this.model?.mesh) return;
+    this.characterVelocity.y = 0;
     this.model.mesh.position.y = 5;
+    this.characterOnGround = false;
   }
 
   update(inputManager: InputManager, cameraManager: CameraManager, runTime: RunTimeManager): void {
