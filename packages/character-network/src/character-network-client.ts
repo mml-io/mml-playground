@@ -1,18 +1,23 @@
 import { Vector2, Vector3 } from "three";
 
-export type AnimationState = "idle" | "walk" | "run";
+import { AnimationState, ClientUpdate } from "./types";
 
-export type ClientUpdate = {
-  id: number;
-  location: Vector3;
-  rotation: Vector2;
-  state: AnimationState;
-};
-
-export class Network {
+class CharacterNetworkClient {
   public connected: boolean = false;
   public clientUpdates: Map<number, ClientUpdate> = new Map();
+  public receivedPackets: { bytes: number; timestamp: number }[] = [];
+
   public id: number = 0;
+
+  public addReceivedPacket(bytes: number): void {
+    const timestamp = Date.now();
+    this.receivedPackets.push({ bytes, timestamp });
+
+    const oneSecondAgo = timestamp - 1000;
+    while (this.receivedPackets.length > 0 && this.receivedPackets[0].timestamp < oneSecondAgo) {
+      this.receivedPackets.shift();
+    }
+  }
 
   public connection = {
     clientId: null as number | null,
@@ -35,6 +40,7 @@ export class Network {
                   );
                 }
                 if (typeof data.connected !== "undefined" && this.connected === false) {
+                  if (this.clientUpdates.get(0)) this.clientUpdates.delete(0);
                   this.connection.clientId = data.id;
                   this.id = this.connection.clientId!;
                   this.connected = true;
@@ -42,12 +48,13 @@ export class Network {
                   wsResolve();
                 }
                 if (typeof data.disconnect !== "undefined") {
+                  if (this.clientUpdates.get(0)) this.clientUpdates.delete(0);
                   this.clientUpdates.delete(data.id);
-                  this.disposeId(data.id);
                   console.log(`Client ID: ${data.id} left`);
                 }
               } else if (message.data instanceof Blob) {
                 const arrayBuffer = await new Response(message.data).arrayBuffer();
+                this.addReceivedPacket(arrayBuffer.byteLength);
                 const updates = this.decodeUpdate(arrayBuffer);
                 this.clientUpdates.set(updates.id, updates);
               } else {
@@ -74,24 +81,6 @@ export class Network {
     },
   };
 
-  nextId: number = 1;
-  recycledIds: number[] = [];
-
-  encoder: TextEncoder = new TextEncoder();
-  decoder: TextDecoder = new TextDecoder();
-
-  getId(): number {
-    if (this.recycledIds.length > 0) {
-      return this.recycledIds.pop() as number;
-    } else {
-      return this.nextId++;
-    }
-  }
-
-  disposeId(id: number): void {
-    this.recycledIds.push(id);
-  }
-
   animationStateToByte(state: AnimationState) {
     switch (state) {
       case "idle":
@@ -100,6 +89,14 @@ export class Network {
         return 1;
       case "run":
         return 2;
+      case "jumpToAir":
+        return 3;
+      case "air":
+        return 4;
+      case "airToGround":
+        return 5;
+      default:
+        return 0;
     }
   }
 
@@ -111,8 +108,14 @@ export class Network {
         return "walk";
       case 2:
         return "run";
+      case 3:
+        return "jumpToAir";
+      case 4:
+        return "air";
+      case 5:
+        return "airToGround";
       default:
-        throw new Error("Invalid byte for animation state");
+        return "idle";
     }
   }
 
@@ -120,9 +123,9 @@ export class Network {
     const buffer = new ArrayBuffer(19);
     const dataView = new DataView(buffer);
     dataView.setUint16(0, update.id); // id
-    dataView.setFloat32(2, update.location.x); // position.x
-    dataView.setFloat32(6, update.location.y); // position.x
-    dataView.setFloat32(10, update.location.z); // position.z
+    dataView.setFloat32(2, update.position.x); // position.x
+    dataView.setFloat32(6, update.position.y); // position.x
+    dataView.setFloat32(10, update.position.z); // position.z
     dataView.setInt16(14, update.rotation.x * 32767); // quaternion.y
     dataView.setInt16(16, update.rotation.y * 32767); // quaternion.w
     dataView.setUint8(18, this.animationStateToByte(update.state)); // animationState
@@ -138,9 +141,9 @@ export class Network {
     const quaternionY = dataView.getInt16(14) / 32767; // quaternion.y
     const quaternionW = dataView.getInt16(16) / 32767; // quaternion.w
     const state = this.byteToAnimationState(dataView.getUint8(18)); // animationState
-    const location = new Vector3(x, y, z);
+    const position = new Vector3(x, y, z);
     const rotation = new Vector2(quaternionY, quaternionW);
-    return { id, location, rotation, state };
+    return { id, position, rotation, state };
   }
 
   public sendUpdate(update: ClientUpdate): void {
@@ -152,3 +155,5 @@ export class Network {
     this.connection.ws?.send(encodedUpdate);
   }
 }
+
+export { CharacterNetworkClient };

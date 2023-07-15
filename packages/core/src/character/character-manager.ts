@@ -1,3 +1,4 @@
+import { CharacterNetworkClient } from "@mml-playground/character-network";
 import { PositionAndRotation } from "mml-web";
 import { Group, PerspectiveCamera, Vector3 } from "three";
 
@@ -5,7 +6,6 @@ import { CameraManager } from "../camera/camera-manager";
 import { CollisionsManager } from "../collisions/collisions-manager";
 import { getSpawnPositionInsideCircle } from "../helpers/math-helpers";
 import { InputManager } from "../input/input-manager";
-import { Network } from "../network/network";
 import { RunTimeManager } from "../runtime/runtime-manager";
 
 import { Character, CharacterDescription } from "./character";
@@ -89,7 +89,7 @@ export class CharacterManager {
     runTime: RunTimeManager,
     inputManager: InputManager,
     cameraManager: CameraManager,
-    network: Network,
+    network: CharacterNetworkClient,
     group: Group,
   ) {
     if (this.character) {

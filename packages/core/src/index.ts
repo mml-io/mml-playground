@@ -3,8 +3,6 @@ export { CharacterDescription } from "./character/character";
 export { CharacterManager } from "./character/character-manager";
 export { InputManager } from "./input/input-manager";
 export { CoreMMLScene } from "./mml/core-mml-scene";
-export { Network } from "./network";
 export { Composer } from "./rendering/composer";
 export { RunTimeManager } from "./runtime/runtime-manager";
-export { networkDebugOverlay } from "./network/network-debug";
 export { CollisionsManager } from "./collisions/collisions-manager";
