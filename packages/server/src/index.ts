@@ -2,6 +2,7 @@ import path from "path";
 
 import { CharacterNetworkServer } from "@mml-playground/character-network";
 import express from "express";
+import cors from "cors";
 import enableWs from "express-ws";
 import WebSocket from "ws";
 
@@ -10,7 +11,7 @@ import { PlaygroundMMLDocumentServer } from "./router/PlaygroundMMLDocumentServe
 import { addWebAppRoutes } from "./router/web-app-routes";
 
 const PORT = process.env.PORT || 8080;
-const DOCUMENT_SOCKET_PATH = "/document";
+const PLAYGROUND_DOCUMENT_SOCKET_PATH = "/document";
 const CHARACTER_NETWORK_SOCKET_PATH = "/network";
 const PLAYGROUND_DOCUMENT_PATH = path.resolve(__dirname, "../playground.html");
 const EXAMPLE_DOCUMENTS_SOCKET_PATH = "/examples";
@@ -33,7 +34,7 @@ app.use("/*", (req: express.Request, res, next) => {
 });
 
 // Handle playground document sockets
-app.ws(DOCUMENT_SOCKET_PATH, (ws) => {
+app.ws(PLAYGROUND_DOCUMENT_SOCKET_PATH, (ws) => {
   playgroundMMLDocumentServer.handle(ws);
 });
 
@@ -42,6 +43,9 @@ app.ws(`${EXAMPLE_DOCUMENTS_SOCKET_PATH}/:filename`, (ws: WebSocket, req: expres
   const { filename } = req.params;
   mmlDocumentsServer.handle(filename, ws);
 });
+
+// Serve assets with CORS allowing all origins
+app.use("/assets/", cors(), express.static(path.resolve(__dirname, "../assets/")));
 
 const characterNetwork = new CharacterNetworkServer();
 app.ws(CHARACTER_NETWORK_SOCKET_PATH, (ws) => {

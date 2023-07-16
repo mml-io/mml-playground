@@ -24,6 +24,7 @@ export class CharacterNetworkClient {
             this.connection.ws = new WebSocket(url);
             this.connection.ws.onerror = () => {
               this.connection.ws = null;
+              this.connected = false;
               wsReject(new Error("WebSocket player server not available"));
             };
             this.connection.ws.onmessage = async (message: MessageEvent) => {
