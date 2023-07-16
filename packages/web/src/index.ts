@@ -43,6 +43,7 @@ export class App {
     this.keyInputManager = new KeyInputManager();
     this.cameraManager = new CameraManager();
     this.camera = this.cameraManager.camera;
+    this.camera.add(this.audioListener);
     this.composer = new Composer(this.scene, this.camera);
     this.networkClient = new CharacterNetworkClient();
     this.collisionsManager = new CollisionsManager(this.scene);
