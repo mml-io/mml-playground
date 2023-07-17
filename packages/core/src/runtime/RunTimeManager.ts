@@ -24,7 +24,9 @@ export class RunTimeManager {
     this.deltaTime = this.clock.getDelta();
     this.time += this.deltaTime;
     this.deltaTimeBuffer.push(this.deltaTime);
-    if (this.deltaTimeBuffer.length > this.bufferSize) this.deltaTimeBuffer.shift();
+    if (this.deltaTimeBuffer.length > this.bufferSize) {
+      this.deltaTimeBuffer.shift();
+    }
     this.smoothDeltaTime =
       this.deltaTimeBuffer.reduce((a, b) => a + b) / this.deltaTimeBuffer.length;
     this.frame++;

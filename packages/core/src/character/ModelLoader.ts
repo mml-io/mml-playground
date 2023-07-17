@@ -4,9 +4,9 @@ import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 export class ModelLoader {
   private debug: boolean = false;
-  private loadingManager: LoadingManager;
-  private fbxLoader: FBXLoader;
-  private gltfLoader: GLTFLoader;
+  private readonly loadingManager: LoadingManager;
+  private readonly fbxLoader: FBXLoader;
+  private readonly gltfLoader: GLTFLoader;
 
   constructor() {
     this.loadingManager = new LoadingManager();
@@ -24,7 +24,7 @@ export class ModelLoader {
       return;
     }
     const name = fileUrl.split("/").pop()!.replace(`.${extension!}`, "");
-    if (this.debug === true) {
+    if (this.debug) {
       console.log(`Loading ${extension} model ${name} from ${fileUrl}`);
     }
     if (["gltf", "glb"].includes(extension)) {

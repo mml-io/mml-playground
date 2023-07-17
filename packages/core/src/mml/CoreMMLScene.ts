@@ -12,50 +12,38 @@ import {
 } from "mml-web";
 import { AudioListener, Group, Object3D, PerspectiveCamera, Scene, WebGLRenderer } from "three";
 
-import { CollisionsManager } from "../collisions/collisions-manager";
+import { CollisionsManager } from "../collisions/CollisionsManager";
 
 export class CoreMMLScene {
+  public group: Group;
   private debug: boolean = false;
-  private scene: THREE.Scene;
-  private camera: THREE.Camera;
-  private mmlScene: Partial<IMMLScene>;
-  private getUserPositionAndRotation: () => PositionAndRotation;
-  private promptManager: PromptManager;
-  private interactionListener: InteractionListener;
-  private elementsHolder: HTMLElement;
-  private audioListener: AudioListener;
-  private clickTrigger: MMLClickTrigger;
-  private collisionsManager: CollisionsManager;
+
+  private readonly mmlScene: Partial<IMMLScene>;
+  private readonly promptManager: PromptManager;
+  private readonly interactionListener: InteractionListener;
+  private readonly clickTrigger: MMLClickTrigger;
 
   constructor(
-    group: Group,
-    elementsHolder: HTMLElement,
-    renderer: WebGLRenderer,
-    scene: Scene,
-    camera: PerspectiveCamera,
-    collisionsManager: CollisionsManager,
-    getUserPositionAndRotation: () => PositionAndRotation,
+    private renderer: WebGLRenderer,
+    private scene: Scene,
+    private camera: PerspectiveCamera,
+    private audioListener: AudioListener,
+    private collisionsManager: CollisionsManager,
+    private getUserPositionAndRotation: () => PositionAndRotation,
+    documentAddress: string,
   ) {
-    this.scene = scene;
-    this.camera = camera;
-    this.elementsHolder = elementsHolder;
-    this.collisionsManager = collisionsManager;
+    this.group = new Group();
     this.promptManager = PromptManager.init(document.body);
 
     const { interactionListener } = InteractionManager.init(document.body, this.camera, this.scene);
     this.interactionListener = interactionListener;
-    this.getUserPositionAndRotation = getUserPositionAndRotation;
-
-    this.audioListener = new AudioListener();
-
-    document.addEventListener("mousedown", this.onMouseDown.bind(this));
 
     this.mmlScene = {
       getAudioListener: () => this.audioListener,
-      getRenderer: () => renderer,
-      getThreeScene: () => scene,
-      getRootContainer: () => group,
-      getCamera: () => camera,
+      getRenderer: () => this.renderer,
+      getThreeScene: () => this.scene,
+      getRootContainer: () => this.group,
+      getCamera: () => this.camera,
       addCollider: (object: Object3D) => {
         this.collisionsManager.addMeshesGroup(object as Group);
       },
@@ -82,26 +70,11 @@ export class CoreMMLScene {
     setGlobalMScene(this.mmlScene as IMMLScene);
     registerCustomElementsToWindow(window);
     this.clickTrigger = MMLClickTrigger.init(document, this.mmlScene as IMMLScene);
-    if (this.debug) console.log(this.clickTrigger);
-  }
-
-  onMouseDown() {
-    if (this.audioListener.context.state === "suspended") {
-      this.audioListener.context.resume();
+    if (this.debug) {
+      console.log(this.clickTrigger);
     }
-  }
-
-  traverseDOM(node: Node | null, callback: (node: Node) => void): void {
-    if (node === null) return;
-    const notGarbage = node.nodeType !== 3 && node.nodeType !== 8;
-    const isMML = node.nodeName.toLowerCase().includes("m-");
-    if (notGarbage) {
-      if (isMML) callback(node);
-      let childNode = node.firstChild;
-      while (childNode) {
-        this.traverseDOM(childNode, callback);
-        childNode = childNode.nextSibling;
-      }
-    }
+    const frameElement = document.createElement("m-frame");
+    frameElement.setAttribute("src", documentAddress);
+    document.body.appendChild(frameElement);
   }
 }

@@ -1,4 +1,4 @@
-import { Color, CubeTexture, MeshPhysicalMaterial, UniformsUtils } from "three";
+import { Color, MeshPhysicalMaterial, UniformsUtils } from "three";
 
 import { bayerDither } from "../rendering/shaders/bayer-dither";
 import {
@@ -11,7 +11,6 @@ type TUniform<TValue = any> = { value: TValue };
 
 export class CharacterMaterial extends MeshPhysicalMaterial {
   public uniforms: Record<string, TUniform> = {};
-  public envTexture: CubeTexture | null = null;
   public colorsCube216: Color[] = [];
 
   constructor() {
@@ -85,7 +84,7 @@ export class CharacterMaterial extends MeshPhysicalMaterial {
     this.generateColorCube();
   }
 
-  generateColorCube() {
+  private generateColorCube() {
     const saturation = 0.7;
     const lightness = 0.8;
     const goldenRatioConjugate = 0.618033988749895;
@@ -97,10 +96,5 @@ export class CharacterMaterial extends MeshPhysicalMaterial {
       this.colorsCube216.push(color);
       hue = (hue + goldenRatioConjugate) % 1;
     }
-  }
-
-  setEnvTexture(cubeTexture: CubeTexture): void {
-    this.envTexture = cubeTexture;
-    this.transmissionMap = this.envTexture;
   }
 }
