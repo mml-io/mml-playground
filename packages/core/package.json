@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@mml-playground/character-network": "0.0.1",
-    "mml-web": "0.2.0",
+    "mml-web": "0.3.0",
     "three": "^0.153.0",
     "postprocessing": "6.32.1",
     "three-mesh-bvh": "0.6.0"

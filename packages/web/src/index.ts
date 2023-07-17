@@ -9,6 +9,7 @@ import {
   KeyInputManager,
   RunTimeManager,
 } from "@mml-playground/core";
+import { MMLCollisionTrigger } from "mml-web";
 import { AudioListener, Fog, Group, PerspectiveCamera, Scene } from "three";
 
 import { Environment } from "./Environment";
@@ -28,6 +29,7 @@ export class App {
   private readonly cameraManager: CameraManager;
   private readonly collisionsManager: CollisionsManager;
   private readonly networkClient: CharacterNetworkClient;
+  private readonly collisionTrigger: MMLCollisionTrigger;
 
   private readonly modelsPath: string = "/web-client/assets/models";
   private readonly characterDescription: CharacterDescription | null = null;
@@ -46,7 +48,8 @@ export class App {
     this.camera.add(this.audioListener);
     this.composer = new Composer(this.scene, this.camera);
     this.networkClient = new CharacterNetworkClient();
-    this.collisionsManager = new CollisionsManager(this.scene);
+    this.collisionTrigger = MMLCollisionTrigger.init();
+    this.collisionsManager = new CollisionsManager(this.scene, this.collisionTrigger);
     this.characterManager = new CharacterManager(
       this.collisionsManager,
       this.cameraManager,

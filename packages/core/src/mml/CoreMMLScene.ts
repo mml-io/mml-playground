@@ -9,6 +9,7 @@ import {
   registerCustomElementsToWindow,
   setGlobalMScene,
   PositionAndRotation,
+  MElement,
 } from "mml-web";
 import { AudioListener, Group, Object3D, PerspectiveCamera, Scene, WebGLRenderer } from "three";
 
@@ -44,8 +45,8 @@ export class CoreMMLScene {
       getThreeScene: () => this.scene,
       getRootContainer: () => this.group,
       getCamera: () => this.camera,
-      addCollider: (object: Object3D) => {
-        this.collisionsManager.addMeshesGroup(object as Group);
+      addCollider: (object: Object3D, mElement: MElement) => {
+        this.collisionsManager.addMeshesGroup(object as Group, mElement);
       },
       updateCollider: (object: Object3D) => {
         this.collisionsManager.updateMeshesGroup(object as Group);

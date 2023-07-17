@@ -1,0 +1,104 @@
+<m-group x="3" ry="30" y="4">
+  <m-position-probe range="7" debug="true" id="my-probe" interval="100"></m-position-probe>
+  <m-image id="canvas-view" rx="90" y="-3.5" collide="false" width="14" height="14"></m-image>
+  <m-group id="user-presence-holder"></m-group>
+</m-group>
+
+<script>
+  const connectedUsers = new Map();
+  const userPresenceHolder = document.getElementById("user-presence-holder");
+  const positionProbe = document.getElementById("my-probe");
+
+  function getOrCreateUser(connectionId, position, rotation) {
+    const user = connectedUsers.get(connectionId);
+    if (user) {
+      user.position = position;
+      user.rotation = rotation;
+      return user;
+    }
+    const userCube = document.createElement("m-cube");
+    userCube.setAttribute("collide", false);
+    userCube.setAttribute("width", 0.25);
+    userCube.setAttribute("height", 0.25);
+    userCube.setAttribute("depth", 0.25);
+    userCube.setAttribute("color", `#${Math.floor(Math.random() * 0xffffff).toString(16)}`);
+    userPresenceHolder.append(userCube);
+    const newUser = {
+      cube: userCube,
+      position,
+      rotation,
+    };
+    connectedUsers.set(connectionId, newUser);
+    return newUser;
+  }
+
+  function clearUser(connectionId) {
+    const user = connectedUsers.get(connectionId);
+    if (!user) return;
+    user.cube.remove();
+    connectedUsers.delete(connectionId);
+  }
+
+  function setCubePosition(connectionId, position, rotation) {
+    const user = getOrCreateUser(connectionId, position, rotation);
+    user.cube.setAttribute("x", position.x);
+    user.cube.setAttribute("y", position.y + 2);
+    user.cube.setAttribute("z", position.z);
+    user.cube.setAttribute("rx", rotation.x);
+    user.cube.setAttribute("ry", rotation.y);
+    user.cube.setAttribute("rz", rotation.z);
+  }
+
+  window.addEventListener("disconnected", (event) => {
+    const { connectionId } = event.detail;
+    clearUser(connectionId);
+    drawState();
+  });
+
+  positionProbe.addEventListener("positionenter", (event) => {
+    const { connectionId, elementRelative, documentRelative } = event.detail;
+    setCubePosition(connectionId, elementRelative.position, elementRelative.rotation);
+    drawState();
+  });
+
+  positionProbe.addEventListener("positionmove", (event) => {
+    const { connectionId, elementRelative, documentRelative } = event.detail;
+    /*
+       It's possible to receive an update without an explicit enter event if this user is already in the range of
+       this element when the document is reloaded. In this case, we need to create the user as if this is an
+       enter event.
+      */
+    setCubePosition(connectionId, elementRelative.position, elementRelative.rotation);
+    drawState();
+  });
+
+  positionProbe.addEventListener("positionleave", (event) => {
+    const { connectionId } = event.detail;
+    clearUser(connectionId);
+    drawState();
+  });
+
+  const canvasView = document.getElementById("canvas-view");
+  const canvas = document.createElement("canvas");
+  canvas.width = 512;
+  canvas.height = 512;
+  const scale = 512/parseFloat(canvasView.getAttribute("width"));
+  const pointDrawSize = 64;
+  const halfPointDrawSize = pointDrawSize / 2;
+  const ctx = canvas.getContext("2d");
+  function drawState() {
+    ctx.clearRect(0, 0, 512, 512);
+    ctx.fillStyle = "red";
+    ctx.fillRect(128, 128, 128, 128);
+    ctx.fillStyle = "orange";
+    ctx.fillRect(256, 256, 128, 128);
+    ctx.fillStyle = "green";
+    for (const [connectionId, user] of connectedUsers) {
+      ctx.fillRect(256 + user.position.x * scale - halfPointDrawSize, 256 - user.position.z * scale - halfPointDrawSize, pointDrawSize, pointDrawSize);
+    }
+    ctx.strokeRect(0, 0, 512, 512);
+    const dataUri = canvas.toDataURL("image/png");
+    canvasView.setAttribute("src", dataUri);
+  }
+  drawState();
+</script>
