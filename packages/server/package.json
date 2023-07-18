@@ -6,10 +6,11 @@
     "node": "16.x"
   },
   "main": "./src/index.js",
+  "type": "module",
   "scripts": {
     "iterate": "nodemon",
-    "build": "rimraf ./dist && node build.mjs",
-    "start": "NODE_ENV=production node dist/index.js",
+    "build": "rimraf ./build && node build.js --build",
+    "start": "NODE_ENV=production node build/index.js",
     "type-check": "tsc --noEmit",
     "lint": "eslint \"./src/**/*.{ts,}\" --max-warnings 0",
     "lint:fix": "eslint \"./src/**/*.{ts,}\" --fix"

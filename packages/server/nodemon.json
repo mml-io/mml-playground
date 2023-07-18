@@ -2,5 +2,5 @@
   "watch": ["src/"],
   "ignore": [],
   "ext": "ts,js,json",
-  "exec": "npm run build && node dist/index.js"
+  "exec": "npm run build && node build/index.js"
 }

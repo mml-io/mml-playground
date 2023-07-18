@@ -17,6 +17,7 @@ tsconfig.tsbuildinfo
 .DS_Store
 
 # Artifacts
+build
 dist
 
 # IDEs and editors

@@ -2,13 +2,13 @@
   "name": "@mml-playground/web",
   "private": true,
   "version": "0.0.1",
+  "type": "module",
   "files": [
-    "/dist",
-    "/src"
+    "/build"
   ],
   "scripts": {
-    "iterate": "npm run build -- --serve --watch",
-    "build": "rimraf ./dist && node build.mjs",
+    "build": "rimraf ./build && node build.js --build",
+    "iterate": "node ./build.js --watch",
     "type-check": "tsc --noEmit",
     "lint": "eslint \"./src/**/*.{ts,tsx}\" --max-warnings 0",
     "lint:fix": "eslint \"./src/**/*.{ts,tsx}\" --fix"

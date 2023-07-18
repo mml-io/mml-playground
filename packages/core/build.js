@@ -1,32 +1,10 @@
 import esbuild from "esbuild";
-import { copy } from "esbuild-plugin-copy";
+import { dtsPlugin } from "esbuild-plugin-d.ts";
 
 const buildMode = "--build";
 const watchMode = "--watch";
 
 const helpString = `Mode must be provided as one of ${buildMode} or ${watchMode}`;
-
-const buildOptions = {
-  entryPoints: ["src/index.ts"],
-  write: true,
-  bundle: true,
-  format: "esm",
-  outdir: "dist",
-  platform: "node",
-  packages: "external",
-  sourcemap: true,
-  target: "node14",
-  plugins: [
-    copy({
-      resolveFrom: "cwd",
-      assets: {
-        from: ["./types-src/**/*"],
-        to: ["./dist/"],
-        keepStructure: true,
-      },
-    }),
-  ],
-};
 
 const args = process.argv.splice(2);
 
@@ -36,6 +14,20 @@ if (args.length !== 1) {
 }
 
 const mode = args[0];
+
+const buildOptions = {
+  entryPoints: ["src/index.ts"],
+  write: true,
+  bundle: true,
+  format: "esm",
+  outdir: "build",
+  target: "es2020",
+  platform: "node",
+  packages: "external",
+  sourcemap: true,
+  loader: {},
+  plugins: [dtsPlugin()],
+};
 
 switch (mode) {
   case buildMode:
