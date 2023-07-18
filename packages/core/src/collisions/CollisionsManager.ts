@@ -37,9 +37,19 @@ export class CollisionsManager {
         const mesh = child as Mesh;
         mesh.localToWorld(new Vector3());
         mesh.updateMatrixWorld();
-        const geometry = mesh.geometry.clone();
-        geometry.applyMatrix4(mesh.matrixWorld);
-        geometries.push(geometry);
+        const clonedGeometry = mesh.geometry.clone();
+        clonedGeometry.applyMatrix4(mesh.matrixWorld);
+
+        for (const key in clonedGeometry.attributes) {
+          if (key !== "position") {
+            clonedGeometry.deleteAttribute(key);
+          }
+        }
+        if (clonedGeometry.index) {
+          geometries.push(clonedGeometry.toNonIndexed());
+        } else {
+          geometries.push(clonedGeometry);
+        }
       }
     });
     const newBufferGeometry = BufferGeometryUtils.mergeGeometries(geometries);
