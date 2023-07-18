@@ -157,7 +157,7 @@ export class CharacterManager {
           characterController.update(
             update,
             this.runTimeManager.time,
-            this.runTimeManager.smoothDeltaTime,
+            this.runTimeManager.deltaTime,
           );
         }
       }

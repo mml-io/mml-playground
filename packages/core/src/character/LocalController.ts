@@ -85,9 +85,9 @@ export class LocalController {
 
     if (movementKeysPressed) {
       const targetAnimation = this.getTargetAnimation();
-      this.model.updateAnimation(targetAnimation, this.runTimeManager.smoothDeltaTime);
+      this.model.updateAnimation(targetAnimation, this.runTimeManager.deltaTime);
     } else {
-      this.model.updateAnimation(AnimationState.idle, this.runTimeManager.smoothDeltaTime);
+      this.model.updateAnimation(AnimationState.idle, this.runTimeManager.deltaTime);
     }
 
     if (Object.values(this.inputDirections).some((v) => v)) {
@@ -95,7 +95,7 @@ export class LocalController {
     }
 
     for (let i = 0; i < this.collisionDetectionSteps; i++) {
-      this.updatePosition(this.runTimeManager.smoothDeltaTime / this.collisionDetectionSteps, i);
+      this.updatePosition(this.runTimeManager.deltaTime / this.collisionDetectionSteps, i);
     }
 
     if (this.model.mesh.position.y < 0) {
