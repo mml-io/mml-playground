@@ -14,7 +14,7 @@
     "downlevelIteration": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noEmit": true,
+    "incremental": true,
     "baseUrl": "."
   },
   "include": ["./src/**/*.ts*"]

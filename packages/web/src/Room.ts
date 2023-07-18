@@ -34,7 +34,7 @@ export class Room extends Group {
     this.add(this.floorMesh);
 
     this.floorTexture = new TextureLoader(new LoadingManager()).load(
-      "/assets/textures/checker.png",
+      "/web-client/assets/textures/checker.png",
       () => {
         this.floorTexture!.wrapS = RepeatWrapping;
         this.floorTexture!.wrapT = RepeatWrapping;

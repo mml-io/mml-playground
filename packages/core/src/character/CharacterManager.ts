@@ -1,5 +1,4 @@
-import { CharacterNetworkClient } from "@mml-playground/character-network";
-import { AnimationState } from "@mml-playground/character-network/src";
+import { AnimationState, CharacterNetworkClient } from "@mml-playground/character-network";
 import { PositionAndRotation } from "mml-web";
 import { Camera, Group, Object3D, PerspectiveCamera, Vector3 } from "three";
 

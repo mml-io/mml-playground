@@ -29,7 +29,7 @@ export class App {
   private readonly collisionsManager: CollisionsManager;
   private readonly networkClient: CharacterNetworkClient;
 
-  private readonly modelsPath: string = "/assets/models";
+  private readonly modelsPath: string = "/web-client/assets/models";
   private readonly characterDescription: CharacterDescription | null = null;
 
   constructor() {

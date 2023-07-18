@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "noImplicitAny": true,
-    "module": "commonjs",
+    "module": "esnext",
     "target": "es2018",
     "jsx": "react",
     "lib": ["es2022", "dom"],
@@ -12,8 +12,8 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "downlevelIteration": true,
-    "noEmit": true,
-    "baseUrl": "."
+    "baseUrl": ".",
+    "incremental": true,
   },
   "include": ["./src/**/*.ts"]
 }

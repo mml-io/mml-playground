@@ -1,4 +1,4 @@
-import { AnimationState } from "@mml-playground/character-network/src";
+import { AnimationState } from "@mml-playground/character-network";
 import {
   AnimationAction,
   AnimationClip,

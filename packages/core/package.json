@@ -2,15 +2,14 @@
   "name": "@mml-playground/core",
   "private": true,
   "version": "0.0.1",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "files": [
-    "/dist",
-    "/src"
+    "/build"
   ],
   "scripts": {
-    "build": "rimraf ./dist && node ./build.js --build",
+    "build": "rimraf ./build && node ./build.js --build",
     "iterate": "node ./build.js --watch",
     "type-check": "tsc --noEmit",
     "lint": "eslint \"./src/**/*.{ts,}\" --max-warnings 0",
