@@ -8,7 +8,7 @@ export class KeyInputManager {
   }
 
   private handleUnfocus(_event: FocusEvent): void {
-    this.keys = new Map<string, boolean>();
+    this.keys.clear();
   }
 
   private onKeyDown(event: KeyboardEvent): void {
