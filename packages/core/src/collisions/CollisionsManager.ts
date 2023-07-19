@@ -1,8 +1,16 @@
 import {
+  MElement,
+  MMLCollisionTrigger,
+  getRelativePositionAndRotationRelativeToObject,
+} from "mml-web";
+import {
+  Box3,
   BufferGeometry,
   Color,
+  Euler,
   FrontSide,
   Group,
+  Line3,
   Mesh,
   MeshStandardMaterial,
   Object3D,
@@ -25,9 +33,11 @@ export class CollisionsManager {
   private tempVector2: Vector3 = new Vector3();
 
   private collisionMeshState: Map<Group, CollisionMeshState> = new Map();
+  private collisionTrigger: MMLCollisionTrigger;
 
-  constructor(scene: Scene) {
+  constructor(scene: Scene, collisionTrigger: MMLCollisionTrigger) {
     this.scene = scene;
+    this.collisionTrigger = collisionTrigger;
   }
 
   private createCollisionMeshState(group: Group): CollisionMeshState {
@@ -70,7 +80,10 @@ export class CollisionsManager {
     return { source: group, visualizer, meshBVH };
   }
 
-  public addMeshesGroup(group: Group): void {
+  public addMeshesGroup(group: Group, mElement?: MElement): void {
+    if (mElement) {
+      this.collisionTrigger.addCollider(group, mElement);
+    }
     const meshState = this.createCollisionMeshState(group);
     if (meshState.visualizer) {
       this.scene.add(meshState.visualizer);
@@ -93,6 +106,7 @@ export class CollisionsManager {
   }
 
   public removeMeshesGroup(group: Group): void {
+    this.collisionTrigger.removeCollider(group);
     const meshState = this.collisionMeshState.get(group);
     if (meshState) {
       if (meshState.visualizer) {
@@ -103,12 +117,12 @@ export class CollisionsManager {
   }
 
   private applyCollider(
-    tempSegment: THREE.Line3,
+    tempSegment: Line3,
     radius: number,
-    boundingBox: THREE.Box3,
+    boundingBox: Box3,
     meshState: CollisionMeshState,
-  ): boolean {
-    let didCollide = false;
+  ): Vector3 | null {
+    let collisionPosition: Vector3 | null = null;
     meshState.meshBVH.shapecast({
       intersectsBounds: (box) => box.intersectsBox(boundingBox),
       intersectsTriangle: (tri) => {
@@ -117,19 +131,42 @@ export class CollisionsManager {
         const distance = tri.closestPointToSegment(tempSegment, triPoint, capsulePoint);
         if (distance < radius) {
           const depth = radius - distance;
+          collisionPosition = new Vector3().copy(capsulePoint);
           const direction = capsulePoint.sub(triPoint).normalize();
           tempSegment.start.addScaledVector(direction, depth);
           tempSegment.end.addScaledVector(direction, depth);
-          didCollide = true;
         }
       },
     });
-    return didCollide;
+    return collisionPosition;
   }
 
-  public applyColliders(tempSegment: THREE.Line3, radius: number, boundingBox: THREE.Box3): void {
+  public applyColliders(tempSegment: Line3, radius: number, boundingBox: Box3) {
+    let collidedElements: Map<
+      Object3D,
+      {
+        position: { x: number; y: number; z: number };
+      }
+    > | null = null;
     for (const meshState of this.collisionMeshState.values()) {
-      this.applyCollider(tempSegment, radius, boundingBox, meshState);
+      const collisionPosition = this.applyCollider(tempSegment, radius, boundingBox, meshState);
+      if (collisionPosition) {
+        if (collidedElements === null) {
+          collidedElements = new Map();
+        }
+        const relativePosition = getRelativePositionAndRotationRelativeToObject(
+          {
+            position: collisionPosition,
+            rotation: new Euler(),
+          },
+          meshState.source,
+        );
+        collidedElements.set(meshState.source, {
+          position: relativePosition.position,
+        });
+      }
     }
+
+    this.collisionTrigger.setCurrentCollisions(collidedElements);
   }
 }
