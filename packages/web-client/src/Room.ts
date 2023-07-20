@@ -39,7 +39,7 @@ export class Room extends Group {
         this.floorTexture!.wrapS = RepeatWrapping;
         this.floorTexture!.wrapT = RepeatWrapping;
         this.floorTexture!.magFilter = NearestFilter;
-        this.floorTexture!.repeat.set(this.floorSize / 1.5, this.floorSize / 1.5);
+        this.floorTexture!.repeat.set(this.floorSize, this.floorSize);
         this.floorMaterial.map = this.floorTexture;
       },
     );

@@ -1,5 +1,5 @@
 {
-  "name": "@mml-playground/web",
+  "name": "web-client",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -14,7 +14,7 @@
     "lint:fix": "eslint \"./src/**/*.{ts,tsx}\" --fix"
   },
   "dependencies": {
-    "@mml-playground/core": "0.0.1",
+    "@mml-io/3d-web-client-core": "0.1.0",
     "three": "^0.153.0"
   },
   "devDependencies": {

@@ -9,9 +9,9 @@
     "build": "lerna run --stream build",
     "start": "npm run start -w @mml-playground/server",
     "iterate": "npm run build && lerna run --parallel --stream iterate",
-    "type-check": "lerna run --stream type-check",
-    "lint": "lerna run --stream lint",
-    "lint:fix": "lerna run --stream lint:fix"
+    "type-check-all": "lerna run --stream type-check",
+    "lint-all": "lerna run --stream lint",
+    "lint-fix-all": "lerna run --stream lint:fix"
   },
   "workspaces": [
     "packages/*"

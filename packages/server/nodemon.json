@@ -1,6 +1,6 @@
 {
-  "watch": ["src/"],
+  "watch": ["build/", "../packages/*/build/"],
   "ignore": [],
   "ext": "ts,js,json",
-  "exec": "npm run build && node build/index.js"
+  "exec": "node build/index.js"
 }

@@ -1,10 +1,21 @@
-import esbuild from "esbuild";
-import { dtsPlugin } from "esbuild-plugin-d.ts";
+const esbuild = require("esbuild");
 
 const buildMode = "--build";
 const watchMode = "--watch";
 
 const helpString = `Mode must be provided as one of ${buildMode} or ${watchMode}`;
+
+const buildOptions = {
+  entryPoints: {
+    index: "src/index.tsx",
+  },
+  bundle: true,
+  external: ["node:crypto"],
+  write: true,
+  publicPath: "/",
+  sourcemap: true,
+  outdir: "build",
+};
 
 const args = process.argv.splice(2);
 
@@ -14,19 +25,6 @@ if (args.length !== 1) {
 }
 
 const mode = args[0];
-
-const buildOptions = {
-  entryPoints: ["src/index.ts"],
-  bundle: true,
-  format: "esm",
-  outdir: "build",
-  target: "es2020",
-  platform: "node",
-  packages: "external",
-  sourcemap: true,
-  loader: {},
-  plugins: [dtsPlugin()],
-};
 
 switch (mode) {
   case buildMode:
