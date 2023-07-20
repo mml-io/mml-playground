@@ -12,7 +12,7 @@ const FORK_PAGE_CONTENT = `
   Please click the 'Fork' button to create your sandbox.
 `;
 
-const webClientBuildDir = path.join(dirname, "../../web/build/");
+const webClientBuildDir = path.join(dirname, "../../web-client/build/");
 export function addWebAppRoutes(app: enableWs.Application) {
   // Serve frontend statically in production
   const demoIndexContent = fs.readFileSync(path.join(webClientBuildDir, "index.html"), "utf8");

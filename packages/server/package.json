@@ -1,5 +1,5 @@
 {
-  "name": "@mml-playground/server",
+  "name": "server",
   "private": true,
   "version": "0.0.1",
   "engines": {
@@ -8,7 +8,7 @@
   "main": "./src/index.js",
   "type": "module",
   "scripts": {
-    "iterate": "nodemon",
+    "iterate": "concurrently \"node build.js --watch\" \"nodemon\"",
     "build": "rimraf ./build && node build.js --build",
     "start": "NODE_ENV=production node build/index.js",
     "type-check": "tsc --noEmit",
@@ -16,11 +16,10 @@
     "lint:fix": "eslint \"./src/**/*.{ts,}\" --fix"
   },
   "dependencies": {
-    "@mml-playground/character-network": "0.0.1",
-    "@mml-playground/web": "0.0.1",
+    "@mml-io/3d-web-user-networking": "0.1.0",
+    "web-client": "0.0.1",
     "networked-dom-server": "0.3.0",
     "chokidar": "^3.5.3",
-    "canvas": "^2.11.2",
     "express": "4.18.2",
     "express-ws": "5.0.2",
     "cors": "^2.8.5",
