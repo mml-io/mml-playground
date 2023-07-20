@@ -37,6 +37,10 @@ export class ReactMMLDocumentServer {
   }
 
   private reload() {
-    this.mmlDocument.load(getMmlDocumentContent(this.mmlDocumentPath));
+    const isSecure = process.env.NODE_ENV === "production";
+    const httpProtocol = isSecure ? "https" : "http";
+    const wsProtocol = isSecure ? "wss" : "ws";
+    console.log("Reloading MML document", wsProtocol, httpProtocol);
+    this.mmlDocument.load(getMmlDocumentContent(this.mmlDocumentPath), {httpProtocol, wsProtocol});
   }
 }
