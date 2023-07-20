@@ -1,5 +1,5 @@
 {
-  "name": "server",
+  "name": "@mml-playground/server",
   "private": true,
   "version": "0.0.1",
   "engines": {

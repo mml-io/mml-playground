@@ -1,5 +1,5 @@
 {
-  "name": "web-client",
+  "name": "@mml-playground/web-client",
   "private": true,
   "version": "0.0.1",
   "type": "module",

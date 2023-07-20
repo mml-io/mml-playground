@@ -1,5 +1,5 @@
 {
-  "name": "mml-doc",
+  "name": "@mml-playground/mml-doc",
   "private": true,
   "scripts": {
     "build": "node ./build.js --build",
