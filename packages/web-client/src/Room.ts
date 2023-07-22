@@ -41,6 +41,7 @@ export class Room extends Group {
         this.floorTexture!.magFilter = NearestFilter;
         this.floorTexture!.repeat.set(this.floorSize, this.floorSize);
         this.floorMaterial.map = this.floorTexture;
+        this.floorMaterial.needsUpdate = true;
       },
     );
   }
