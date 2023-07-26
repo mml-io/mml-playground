@@ -41,6 +41,9 @@ export class ReactMMLDocumentServer {
     const httpProtocol = isSecure ? "https" : "http";
     const wsProtocol = isSecure ? "wss" : "ws";
     console.log("Reloading MML document", wsProtocol, httpProtocol);
-    this.mmlDocument.load(getMmlDocumentContent(this.mmlDocumentPath), {httpProtocol, wsProtocol});
+    this.mmlDocument.load(getMmlDocumentContent(this.mmlDocumentPath), {
+      httpProtocol,
+      wsProtocol,
+    });
   }
 }
