@@ -14,8 +14,8 @@
     "lint:fix": "eslint \"./src/**/*.{ts,tsx}\" --fix"
   },
   "dependencies": {
-    "@mml-io/3d-web-client-core": "0.2.0",
-    "@mml-io/3d-web-user-networking": "0.2.0",
+    "@mml-io/3d-web-client-core": "0.4.0",
+    "@mml-io/3d-web-user-networking": "0.4.0",
     "three": "^0.153.0"
   },
   "devDependencies": {

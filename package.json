@@ -22,7 +22,6 @@
     "concurrently": "^8.1.0",
     "esbuild": "0.17.19",
     "esbuild-plugin-copy": "2.1.1",
-    "esbuild-plugin-d.ts": "^1.1.0",
     "eslint": "^8.42.0",
     "eslint-config-airbnb-typescript": "^17.0.0",
     "eslint-config-prettier": "^8.8.0",

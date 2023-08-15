@@ -35,8 +35,14 @@ export function Slot(props: { x: number; z: number; demo?: { url: string; title:
   const [tickNumber, setTickNumber] = useState(0);
 
   useEffect(() => {
-    if (loadedState) {
+    if (loadedState && loadedState.removable) {
       const interval = setInterval(() => {
+        const documentLifetime = (now - loadedState.loadedTime) / 1000;
+        const secondsRemaining = Math.ceil(DOCUMENT_LIFETIME_DURATION_S - documentLifetime);
+        if (secondsRemaining <= 0) {
+          setLoadedState(null);
+          return;
+        }
         setTickNumber(tickNumber + 1);
       }, 500);
       return () => clearInterval(interval);
