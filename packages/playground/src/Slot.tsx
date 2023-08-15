@@ -35,6 +35,17 @@ export function Slot(props: { x: number; z: number; demo?: { url: string; title:
   const [tickNumber, setTickNumber] = useState(0);
 
   useEffect(() => {
+    const listener = (event: Event) => {
+      const { connectionId } = (event as CustomEvent<{ connectionId: number }>).detail;
+      if (loadedState && loadedState.userId === connectionId) {
+        setLoadedState(null);
+      }
+    };
+    window.addEventListener("disconnected", listener);
+    return () => window.removeEventListener("disconnected", listener);
+  }, [loadedState]);
+
+  useEffect(() => {
     if (loadedState && loadedState.removable) {
       const interval = setInterval(() => {
         const documentLifetime = (now - loadedState.loadedTime) / 1000;
