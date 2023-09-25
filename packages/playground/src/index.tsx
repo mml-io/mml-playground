@@ -15,37 +15,37 @@ const DEMO_SLOTS = [
   {
     x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * -2,
     z: 0,
-    documentUrl: `${window.params.wsProtocol}:///examples/collision-events.html`,
+    documentUrl: `${(window as any).params.wsProtocol}:///examples/collision-events.html`,
     title: "Collision Events Demo",
   },
   {
     x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * -2,
     z: SPACE_BETWEEN_SLOTS + SLOT_DEPTH,
-    documentUrl: `${window.params.wsProtocol}:///examples/position-probe.html`,
+    documentUrl: `${(window as any).params.wsProtocol}:///examples/position-probe.html`,
     title: "m-position-probe Demo",
   },
   {
     x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * -1,
     z: 0,
-    documentUrl: `${window.params.wsProtocol}:///examples/duck.html`,
+    documentUrl: `${(window as any).params.wsProtocol}:///examples/duck.html`,
     title: "Rotating Duck",
   },
   {
     x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * -1,
     z: SLOT_DEPTH + SPACE_BETWEEN_SLOTS,
-    documentUrl: `${window.params.wsProtocol}:///examples/dice.html`,
+    documentUrl: `${(window as any).params.wsProtocol}:///examples/dice.html`,
     title: "Interactive Dice",
   },
   {
     x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * -1,
     z: (SLOT_DEPTH + SPACE_BETWEEN_SLOTS) * 2,
-    documentUrl: `${window.params.wsProtocol}:///examples/videoplayer.html`,
+    documentUrl: `${(window as any).params.wsProtocol}:///examples/videoplayer.html`,
     title: "Video Player",
   },
   {
     x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * -1,
     z: (SLOT_DEPTH + SPACE_BETWEEN_SLOTS) * 3,
-    documentUrl: `${window.params.wsProtocol}:///examples/weather.html`,
+    documentUrl: `${(window as any).params.wsProtocol}:///examples/weather.html`,
     title: "Weather API",
   },
   {
