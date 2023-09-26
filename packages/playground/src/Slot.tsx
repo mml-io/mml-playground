@@ -58,7 +58,7 @@ export function Slot(props: { x: number; z: number; demo?: { url: string; title:
       }, 500);
       return () => clearInterval(interval);
     }
-  }, [loadedState, tickNumber]);
+  }, [loadedState, now, tickNumber]);
 
   let remainingTimeLabel = "";
   if (loadedState && loadedState.removable) {
