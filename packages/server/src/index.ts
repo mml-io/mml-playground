@@ -15,6 +15,8 @@ import { MMLDocumentsServer } from "./router/MMLDocumentsServer";
 import { ReactMMLDocumentServer } from "./router/ReactMMLDocumentServer";
 import { addWebAppRoutes } from "./router/web-app-routes";
 
+dotenv.config();
+
 const dirname = url.fileURLToPath(new URL(".", import.meta.url));
 const PORT = process.env.PORT || 8080;
 const MML_DOCUMENT_PATH = path.join(dirname, "../../playground/build/index.js");
