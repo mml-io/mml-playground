@@ -1,98 +1,53 @@
 <m-model
   id="dice"
-  src="/assets/dice.glb"
-  sx="1"
-  sy="1"
-  sz="1"
-  y="1"
-  rx="0"
-  ry="0"
-  rz="0"
+  src="https://public.mml.io/dice.glb"
   onclick="rollDice()"
-  collide="true"
-></m-model>
+>
+  <m-attr-anim id="y-up-anim" easing="easeOutSine" attr="y" duration="200" start="1" end="1" loop="false"></m-attr-anim>
+  <m-attr-anim id="y-down-anim" easing="easeOutBounce" attr="y" start-time="0" duration="500" start="1" end="1" loop="false"></m-attr-anim>
+  <m-attr-anim id="rx-anim" attr="rx" duration="400" start="0" end="0" loop="false"></m-attr-anim>
+  <m-attr-anim id="ry-anim" attr="ry" duration="400" start="0" end="0" loop="false"></m-attr-anim>
+  <m-attr-anim id="rz-anim" attr="rz" duration="400" start="0" end="0" loop="false"></m-attr-anim>
+</m-model>
 <script>
-  function lerp(start, end, t) {
-    return start * (1 - t) + end * t;
-  }
-
-  function radToDeg(radians) {
-    return radians * (180 / Math.PI);
-  }
-
   let rollResult = 1;
+  let rollTime = 0;
+  const rollMap = {
+    1: [0, 0, 0],
+    2: [0, 0, 270],
+    3: [270, 0, 0],
+    4: [90, 0, 0],
+    5: [0, 0, 90],
+    6: [180, 0, 0],
+  };
+
+  const yUpAnim = document.getElementById("y-up-anim");
+  const yDownAnim = document.getElementById("y-down-anim");
+  const rxAnim = document.getElementById("rx-anim");
+  const ryAnim = document.getElementById("ry-anim");
+  const rzAnim = document.getElementById("rz-anim");
 
   function rollDice() {
-    const rollMap = {
-      1: {
-        rx: radToDeg(2 * Math.PI),
-        ry: 0,
-        rz: radToDeg(2 * Math.PI),
-      },
-      2: {
-        rx: radToDeg(2 * Math.PI),
-        ry: 0,
-        rz: radToDeg(2 * Math.PI - Math.PI / 2),
-      },
-      3: {
-        rx: radToDeg(2 * Math.PI - Math.PI / 2),
-        ry: 0,
-        rz: radToDeg(2 * Math.PI),
-      },
-      4: {
-        rx: radToDeg(2 * Math.PI + Math.PI / 2),
-        ry: 0,
-        rz: radToDeg(2 * Math.PI),
-      },
-      5: {
-        rx: radToDeg(2 * Math.PI),
-        ry: 0,
-        rz: radToDeg(2 * Math.PI + Math.PI / 2),
-      },
-      6: {
-        rx: radToDeg(2 * Math.PI + Math.PI),
-        ry: 0,
-        rz: radToDeg(2 * Math.PI),
-      },
-    };
-
-    const diceElement = document.getElementById("dice");
-
-    let newRoll = Math.floor(Math.random() * 6) + 1;
-    while (newRoll === rollResult) {
-      newRoll = Math.floor(Math.random() * 6) + 1;
+    const t = document.timeline.currentTime + 50;
+    if (t < rollTime + 400) {
+      return;
     }
-    rollResult = newRoll;
-
+    rollTime = t;
+    const oldRotation = rollMap[rollResult];
+    rollResult = Math.floor(Math.random() * 6) + 1;
     const targetRotation = rollMap[rollResult];
-    const startRotation = {
-      rx: parseFloat(diceElement.getAttribute("rx")),
-      ry: parseFloat(diceElement.getAttribute("ry")),
-      rz: parseFloat(diceElement.getAttribute("rz")),
-    };
-    const animationTime = 400;
-    const interval = 40;
-    let currentTime = 0;
-
-    let intervalId = setInterval(() => {
-      currentTime += interval;
-      if (currentTime < animationTime) {
-        let t = currentTime / animationTime;
-        let currentRotation = {
-          rx: lerp(startRotation.rx, targetRotation.rx, t),
-          ry: lerp(startRotation.ry, targetRotation.ry, t),
-          rz: lerp(startRotation.rz, targetRotation.rz, t),
-        };
-        diceElement.setAttribute("rx", currentRotation.rx.toString());
-        diceElement.setAttribute("ry", currentRotation.ry.toString());
-        diceElement.setAttribute("rz", currentRotation.rz.toString());
-        diceElement.setAttribute("y", Math.cos(t * 2.0 - 0.5) * 3.5);
-      } else {
-        diceElement.setAttribute("rx", targetRotation.rx.toString());
-        diceElement.setAttribute("ry", targetRotation.ry.toString());
-        diceElement.setAttribute("rz", targetRotation.rz.toString());
-        clearInterval(intervalId);
-      }
-    }, interval);
+    yUpAnim.setAttribute("start-time", t);
+    yUpAnim.setAttribute("end", 2);
+    yDownAnim.setAttribute("start-time", t+300);
+    yDownAnim.setAttribute("start", 2);
+    rxAnim.setAttribute("start-time", t);
+    rxAnim.setAttribute("start", oldRotation[0].toString());
+    rxAnim.setAttribute("end", targetRotation[0].toString());
+    ryAnim.setAttribute("start-time", t);
+    ryAnim.setAttribute("start", oldRotation[1].toString());
+    ryAnim.setAttribute("end", targetRotation[1].toString());
+    rzAnim.setAttribute("start-time", t);
+    rzAnim.setAttribute("start", oldRotation[2].toString());
+    rzAnim.setAttribute("end", targetRotation[2].toString());
   }
 </script>

@@ -28,7 +28,7 @@ const DEMO_SLOTS = [
     x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * -1,
     z: 0,
     documentUrl: `${(window as any).params.wsProtocol}:///examples/duck.html`,
-    title: "Rotating Duck",
+    title: "Spinning Duck",
   },
   {
     x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * -1,
