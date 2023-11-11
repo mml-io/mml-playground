@@ -8,7 +8,7 @@ import {
   MMLCompositionScene,
   KeyInputManager,
   TimeManager,
-  Sun as ComposerSun,
+  CharacterModelLoader,
 } from "@mml-io/3d-web-client-core";
 import { ChatNetworkingClient, FromClientChatMessage, TextChatUI } from "@mml-io/3d-web-text-chat";
 import {
@@ -17,15 +17,16 @@ import {
   WebsocketStatus,
 } from "@mml-io/3d-web-user-networking";
 import { VoiceChatManager } from "@mml-io/3d-web-voice-chat";
+import { IMMLScene, registerCustomElementsToWindow, setGlobalMMLScene } from "mml-web";
 import { AudioListener, Group, PerspectiveCamera, Scene } from "three";
 
 import { Room } from "./Room";
-import { Sun } from "./Sun";
 
 export class App {
   private readonly group: Group;
   private readonly scene: Scene;
   private readonly audioListener: AudioListener;
+  private readonly characterModelLoader = new CharacterModelLoader();
   private readonly composer: Composer;
   private readonly camera: PerspectiveCamera;
   private readonly timeManager: TimeManager;
@@ -33,15 +34,12 @@ export class App {
   private readonly characterManager: CharacterManager;
   private readonly cameraManager: CameraManager;
   private readonly collisionsManager: CollisionsManager;
+  private readonly mmlCompositionScene: MMLCompositionScene;
   private readonly networkClient: UserNetworkingClient;
 
   private readonly remoteUserStates = new Map<number, CharacterState>();
   private readonly modelsPath: string = "/web-client/assets/models";
   private readonly characterDescription: CharacterDescription | null = null;
-
-  private readonly useComposerSun: boolean = true;
-
-  private readonly sun: Sun | ComposerSun | null;
 
   private networkChat: ChatNetworkingClient | null = null;
 
@@ -57,6 +55,8 @@ export class App {
   private readonly host: string = window.location.host;
 
   constructor() {
+    registerCustomElementsToWindow(window);
+
     this.scene = new Scene();
     this.collisionsManager = new CollisionsManager(this.scene);
 
@@ -73,11 +73,24 @@ export class App {
 
     this.timeManager = new TimeManager();
     this.keyInputManager = new KeyInputManager();
-    this.cameraManager = new CameraManager(this.collisionsManager);
+
+    const composerHolderElement = document.createElement("div");
+    composerHolderElement.style.position = "absolute";
+    composerHolderElement.style.width = "100%";
+    composerHolderElement.style.height = "100%";
+    document.body.appendChild(composerHolderElement);
+
+    this.cameraManager = new CameraManager(composerHolderElement, this.collisionsManager);
     this.camera = this.cameraManager.camera;
     this.camera.add(this.audioListener);
     this.composer = new Composer(this.scene, this.camera, true);
     this.composer.useHDRI("/web-client/assets/hdr/industrial_sunset_2k.hdr");
+    composerHolderElement.appendChild(this.composer.renderer.domElement);
+
+    const resizeObserver = new ResizeObserver(() => {
+      this.composer.fitContainer();
+    });
+    resizeObserver.observe(composerHolderElement);
 
     this.characterDescription = {
       meshFileUrl: `${this.modelsPath}/unreal-mesh.glb`,
@@ -121,6 +134,7 @@ export class App {
 
     this.characterManager = new CharacterManager(
       this.composer,
+      this.characterModelLoader,
       this.collisionsManager,
       this.cameraManager,
       this.timeManager,
@@ -133,7 +147,8 @@ export class App {
     );
     this.group.add(this.characterManager.group);
 
-    const mmlComposition = new MMLCompositionScene(
+    this.mmlCompositionScene = new MMLCompositionScene(
+      composerHolderElement,
       this.composer.renderer,
       this.scene,
       this.camera,
@@ -142,16 +157,15 @@ export class App {
       () => {
         return this.characterManager.getLocalCharacterPositionAndRotation();
       },
-      [`${this.protocol}//${this.host}/playground`],
     );
+    this.group.add(this.mmlCompositionScene.group);
+    setGlobalMMLScene(this.mmlCompositionScene.mmlScene as IMMLScene);
 
-    this.group.add(mmlComposition.group);
-
-    if (this.useComposerSun === true) {
-      this.sun = this.composer.sun;
-    } else {
-      this.sun = new Sun();
-      this.group.add(this.sun);
+    const documentAddresses = [`${this.protocol}//${this.host}/playground`];
+    for (const address of documentAddresses) {
+      const frameElement = document.createElement("m-frame");
+      frameElement.setAttribute("src", address);
+      document.body.appendChild(frameElement);
     }
 
     const room = new Room();
@@ -191,9 +205,6 @@ export class App {
             this.remoteUserStates.clear();
           }
         },
-        (clientId: number) => {
-          console.log(`Assigned Chat ID: ${clientId}`);
-        },
         (clientId: number, chatNetworkingUpdate: null | FromClientChatMessage) => {
           if (chatNetworkingUpdate !== null && this.textChatUI !== null) {
             this.textChatUI.addTextMessage(clientId.toString(), chatNetworkingUpdate.text);
@@ -210,8 +221,8 @@ export class App {
       this.characterManager.setSpeakingCharacter(id, value);
     });
     this.cameraManager.update();
-    if (this.sun) {
-      this.sun.updateCharacterPosition(this.characterManager.character?.position);
+    if (this.composer.sun) {
+      this.composer.sun.updateCharacterPosition(this.characterManager.character?.position);
     }
     this.composer.render(this.timeManager);
     requestAnimationFrame(() => {

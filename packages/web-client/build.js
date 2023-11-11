@@ -21,6 +21,7 @@ const buildOptions = {
   },
   bundle: true,
   write: true,
+  sourcemap: true,
   outdir: "./build/",
   assetNames: "[dir]/[name]-[hash]",
   target: "es2020",
