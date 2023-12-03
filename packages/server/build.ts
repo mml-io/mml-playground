@@ -1,21 +1,9 @@
-const esbuild = require("esbuild");
+import * as esbuild from "esbuild";
 
 const buildMode = "--build";
 const watchMode = "--watch";
 
 const helpString = `Mode must be provided as one of ${buildMode} or ${watchMode}`;
-
-const buildOptions = {
-  entryPoints: {
-    index: "src/index.tsx",
-  },
-  bundle: true,
-  external: ["node:crypto"],
-  write: true,
-  publicPath: "/",
-  sourcemap: true,
-  outdir: "build",
-};
 
 const args = process.argv.splice(2);
 
@@ -25,6 +13,17 @@ if (args.length !== 1) {
 }
 
 const mode = args[0];
+
+const buildOptions: esbuild.BuildOptions = {
+  entryPoints: ["src/index.ts"],
+  outdir: "./build",
+  bundle: true,
+  format: "esm",
+  packages: "external",
+  sourcemap: true,
+  platform: "node",
+  target: "es2020",
+};
 
 switch (mode) {
   case buildMode:
