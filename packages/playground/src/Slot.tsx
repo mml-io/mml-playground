@@ -185,8 +185,8 @@ export function Slot(props: { x: number; z: number; demo?: { url: string; title:
               props.demo
                 ? props.demo.title
                 : loadedState
-                ? remainingTimeLabel
-                : "Click slot to showcase your MML document"
+                  ? remainingTimeLabel
+                  : "Click slot to showcase your MML document"
             }
             rz={rz}
             x={x || 0}
