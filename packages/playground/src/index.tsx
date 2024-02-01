@@ -25,6 +25,12 @@ const DEMO_SLOTS = [
     title: "m-position-probe Demo",
   },
   {
+    x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * -2,
+    z: (SPACE_BETWEEN_SLOTS + SLOT_DEPTH) * 2,
+    documentUrl: `${(window as any).params.wsProtocol}:///examples/moving-platform.html`,
+    title: "Moving Platform Demo",
+  },
+  {
     x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * -1,
     z: 0,
     documentUrl: `${(window as any).params.wsProtocol}:///examples/duck.html`,

@@ -1,4 +1,5 @@
 import {
+  AnimationConfig,
   CameraManager,
   CharacterDescription,
   CharacterManager,
@@ -37,13 +38,15 @@ import sprintAnimationFileUrl from "./assets/models/unreal-run.glb";
 import { LoadingScreen } from "./LoadingScreen";
 import { Room } from "./Room";
 
-const characterDescription: CharacterDescription = {
+const animationConfig: AnimationConfig = {
   airAnimationFileUrl,
   idleAnimationFileUrl,
   jogAnimationFileUrl,
-  meshFileUrl,
   sprintAnimationFileUrl,
-  modelScale: 1,
+};
+
+const characterDescription: CharacterDescription = {
+  meshFileUrl,
 };
 
 const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
@@ -156,6 +159,8 @@ export class App {
         this.latestCharacterObject.characterState = characterState;
         this.networkClient.sendUpdate(characterState);
       },
+      animationConfig,
+      characterDescription,
     );
     this.scene.add(this.characterManager.group);
 
@@ -266,10 +271,9 @@ export class App {
       spawnRotation.setFromQuaternion(urlParams.character.quaternion);
       cameraPosition = urlParams.camera.position;
     }
-    this.characterManager.spawnCharacter(
+    this.characterManager.spawnLocalCharacter(
       characterDescription,
       this.clientId!,
-      true,
       spawnPosition,
       spawnRotation,
     );

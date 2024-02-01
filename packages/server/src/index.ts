@@ -2,7 +2,7 @@ import path from "path";
 import url from "url";
 
 import dolbyio from "@dolbyio/dolbyio-rest-apis-client";
-import JwtToken from "@dolbyio/dolbyio-rest-apis-client/dist/types/jwtToken";
+import * as jwtToken from "@dolbyio/dolbyio-rest-apis-client/dist/types/jwtToken";
 import { ChatNetworkingServer } from "@mml-io/3d-web-text-chat";
 import { UserNetworkingServer } from "@mml-io/3d-web-user-networking";
 import cors from "cors";
@@ -27,9 +27,9 @@ app.enable("trust proxy");
 
 const DOLBY_APP_KEY = process.env.DOLBY_APP_KEY ?? "";
 const DOLBY_APP_SECRET = process.env.DOLBY_APP_SECRET ?? "";
-let apiTokenPromise: Promise<JwtToken>;
+let apiTokenPromise: Promise<jwtToken.JwtToken>;
 
-const fetchApiToken = (): Promise<JwtToken> => {
+const fetchApiToken = (): Promise<jwtToken.JwtToken> => {
   if (DOLBY_APP_KEY && DOLBY_APP_SECRET) {
     const apiAccessToken = dolbyio.authentication.getApiAccessToken(
       DOLBY_APP_KEY,
@@ -42,7 +42,7 @@ const fetchApiToken = (): Promise<JwtToken> => {
   throw new Error("Audio service not configured");
 };
 
-const fetchAccessToken = (apiToken: JwtToken, id: string) => {
+const fetchAccessToken = (apiToken: jwtToken.JwtToken, id: string) => {
   const accessToken = dolbyio.communications.authentication.getClientAccessTokenV2({
     accessToken: apiToken,
     externalId: id,

@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.1",
   "engines": {
-    "node": "16.x"
+    "node": "18.x"
   },
   "main": "./src/index.js",
   "type": "module",
@@ -16,19 +16,19 @@
     "lint:fix": "eslint \"./src/**/*.{ts,}\" --fix"
   },
   "dependencies": {
-    "@mml-io/3d-web-text-chat": "0.11.0",
-    "@mml-io/3d-web-user-networking": "0.11.0",
-    "@dolbyio/dolbyio-rest-apis-client": "4.0.2",
+    "@mml-io/3d-web-text-chat": "0.12.1",
+    "@mml-io/3d-web-user-networking": "0.12.1",
+    "@dolbyio/dolbyio-rest-apis-client": "4.1.0",
     "canvas": "2.11.2",
-    "web-client": "0.0.1",
-    "networked-dom-server": "0.11.2",
+    "web-client": "file:../web-client",
+    "networked-dom-server": "0.11.3",
     "chokidar": "3.5.3",
     "express": "4.18.2",
     "express-ws": "5.0.2",
     "cors": "2.8.5",
     "http-proxy": "1.18.1",
-    "ws": "8.14.2",
-    "dotenv": "16.3.1"
+    "ws": "8.16.0",
+    "dotenv": "16.4.1"
   },
   "devDependencies": {
     "@types/express": "4.17.21",
@@ -36,7 +36,7 @@
     "@types/jsdom": "21.1.6",
     "@types/express-ws": "3.0.4",
     "@types/http-proxy": "1.17.14",
-    "@types/node": "20.10.3",
-    "nodemon": "3.0.2"
+    "@types/node": "20.11.15",
+    "nodemon": "3.0.3"
   }
 }
