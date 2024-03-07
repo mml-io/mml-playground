@@ -16,8 +16,8 @@
     "lint:fix": "eslint \"./src/**/*.{ts,}\" --fix"
   },
   "dependencies": {
-    "@mml-io/3d-web-text-chat": "0.12.2",
-    "@mml-io/3d-web-user-networking": "0.12.2",
+    "@mml-io/3d-web-text-chat": "0.13.0",
+    "@mml-io/3d-web-user-networking": "0.13.0",
     "@dolbyio/dolbyio-rest-apis-client": "4.1.0",
     "canvas": "2.11.2",
     "web-client": "file:../web-client",
