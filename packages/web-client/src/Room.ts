@@ -25,10 +25,10 @@ export class Room extends Group {
     super();
 
     this.floorMaterial = new MeshStandardMaterial({
-      color: 0xbcbcbc,
+      color: 0xffffff,
       side: FrontSide,
-      metalness: 0.04,
-      roughness: 0.49,
+      metalness: 0.05,
+      roughness: 0.95,
     });
     this.floorMesh = new Mesh(this.floorGeometry, this.floorMaterial);
     this.floorMesh.receiveShadow = true;

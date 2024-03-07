@@ -29,12 +29,12 @@ import {
 } from "mml-web";
 import { AudioListener, Euler, Scene, Vector3 } from "three";
 
-import hdrUrl from "./assets/hdr/industrial_sunset_2k.hdr";
-import airAnimationFileUrl from "./assets/models/unreal-air.glb";
-import idleAnimationFileUrl from "./assets/models/unreal-idle.glb";
-import jogAnimationFileUrl from "./assets/models/unreal-jog.glb";
-import meshFileUrl from "./assets/models/unreal-mesh.glb";
-import sprintAnimationFileUrl from "./assets/models/unreal-run.glb";
+import hdrUrl from "./assets/hdr/puresky_2k.hdr";
+import airAnimationFileUrl from "./assets/models/anim_air.glb";
+import idleAnimationFileUrl from "./assets/models/anim_idle.glb";
+import jogAnimationFileUrl from "./assets/models/anim_jog.glb";
+import sprintAnimationFileUrl from "./assets/models/anim_run.glb";
+import meshFileUrl from "./assets/models/bot.glb";
 import { LoadingScreen } from "./LoadingScreen";
 import { Room } from "./Room";
 
@@ -54,6 +54,7 @@ const host = window.location.host;
 const userNetworkAddress = `${protocol}//${host}/network`;
 
 export class App {
+  private appWrapper = document.getElementById("app");
   private element: HTMLDivElement;
   private composer: Composer;
   private tweakPane: TweakPane;
@@ -95,7 +96,11 @@ export class App {
     this.element.style.position = "absolute";
     this.element.style.width = "100%";
     this.element.style.height = "100%";
-    document.body.appendChild(this.element);
+    if (this.appWrapper) {
+      this.appWrapper.appendChild(this.element);
+    } else {
+      document.body.appendChild(this.element);
+    }
 
     this.cameraManager = new CameraManager(this.element, this.collisionsManager);
     this.cameraManager.camera.add(this.audioListener);
