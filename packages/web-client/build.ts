@@ -32,8 +32,8 @@ const buildOptions: esbuild.BuildOptions = {
     ".glb": "file",
     ".hdr": "file",
   },
-  outbase: "../",
-  sourceRoot: "./src",
+  outbase: "./src/",
+  sourceRoot: "./src/",
   publicPath: "/web-client/",
   plugins: [
     copy({

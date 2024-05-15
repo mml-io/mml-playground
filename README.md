@@ -1,7 +1,7 @@
 # MML Playground
 
 This project implements a minimal 3d 'playground' powered by
-[MML (Metaverse Markup Language)](https://mml.io/). It serves as a great starting point to create
+[MML (Metaverse Markup Language)](https://mml.io/) and the [(MML) 3D Web Experience](https://github.com/mml-io/3d-web-experience) project. It serves as a great starting point to create
 your own end-to-end live, multiplayer experience using the the unique, real-time nature of MML.
 
 It can be easily deployed to environments that support Node.js and expose ports to the internet.
@@ -19,27 +19,18 @@ It can be easily deployed to environments that support Node.js and expose ports 
 
 - Players can interact with any of the showcased documents simultaneously.
 
-- It's very easy to deploy and get started with.
-
 ## Project structure:
 
-The project is broken down into four independent packages.
+The project contains the following packages:
 
-- `server`: creates the main server which serves the page and handles all WebSocket connections.
-  Additionally, it runs the main MML document, `playground.html`, and all documents within the
-  `examples` directory.
-
-- `web`: implements the browser-based 3d experience by utilizing the `core` package.
-
-- `core`: includes all common functionality such as controlling the character, composing the whole
-  scene and managing rendering.
-
-- `character-network`: provides an implementation of a WebSocket server that synchronizes character
-  positions across all connected clients.
+- [`server`](./packages/server): an ExpressJS server which serves the page and handles all WebSocket connections using the `@mml-io/3d-web-experience-server` package from [(MML) 3D Web Experience](https://github.com/mml-io/3d-web-experience).
+  - Additionally, it runs the main MML document, `playground.html`, and all documents within the
+  [`server/examples`](./packages/server/examples) directory.
+- [`web-client`](./packages/web-client): implements the browser-based 3d experience by using the `@mml-io/3d-web-experience-client` package from [(MML) 3D Web Experience](https://github.com/mml-io/3d-web-experience).
 
 ## Adding more MML documents
 
-The `server/examples` directory contains the MML documents that are loaded in the playground by
+The [`server/examples`](./packages/server/examples) directory contains the MML documents that are loaded in the playground by
 default.
 
 To add a new example, simply create a new HTML file, such as `new-example.html` inside the
@@ -49,11 +40,9 @@ a free slot.
 
 ## Run on CodeSandbox
 
-Click the button below to create a new sandbox on CodeSandbox.io.
+Click the button below to create a new sandbox on CodeSandbox.io (It might take a minute or two to install dependencies).
 
-[![Edit mml-playground on CodeSandbox](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/p/sandbox/4zf432)
-
-Once your sandbox is initialized, select the 'start: 8080' tab to view the running playground.
+[![Edit mml-playground on CodeSandbox](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/p/github/mml-io/mml-playground)
 
 ## Running locally
 
