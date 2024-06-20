@@ -16,8 +16,8 @@
     "lint:fix": "eslint \"./src/**/*.{ts,}\" --fix"
   },
   "dependencies": {
-    "@mml-io/3d-web-experience-server": "0.16.0",
-    "networked-dom-server": "0.14.0",
+    "@mml-io/3d-web-experience-server": "0.17.0",
+    "networked-dom-server": "0.15.0",
     "canvas": "2.11.2",
     "web-client": "file:../web-client",
     "chokidar": "3.6.0",
