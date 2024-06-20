@@ -15,8 +15,9 @@ const app = new Networked3dWebExperienceClient(holder, {
     idleAnimationFileUrl: "./assets/models/anim_idle.glb",
     jogAnimationFileUrl: "./assets/models/anim_jog.glb",
     sprintAnimationFileUrl: "./assets/models/anim_run.glb",
+    doubleJumpAnimationFileUrl: "./assets/models/anim_double_jump.glb",
   },
-  hdrJpgUrl: "./assets/hdr/puresky_2k.jpg",
+  skyboxHdrJpgUrl: "./assets/hdr/puresky_2k.jpg",
   mmlDocuments: [{ url: `${protocol}//${host}/playground` }],
 });
 app.update();
