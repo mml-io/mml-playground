@@ -22,7 +22,7 @@
         devShells = {
           default = pkgs.mkShell {
             buildInputs =
-              [ pkgs.nodejs ]
+              [ pkgs.nodejs_20 ]
               # node-canvas builds from source on Apple silicon,
               # so we need these additional deps
               ++ (nixpkgs.lib.lists.optionals isAppleSilicon [

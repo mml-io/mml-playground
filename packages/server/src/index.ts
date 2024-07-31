@@ -9,7 +9,6 @@ import express from "express";
 import enableWs from "express-ws";
 
 import { BasicUserAuthenticator } from "./BasicUserAuthenticator";
-import { ReactMMLDocumentServer } from "./ReactMMLDocumentServer";
 
 dotenv.config();
 
@@ -18,8 +17,7 @@ const PORT = process.env.PORT || 8080;
 const webClientBuildDir = path.join(dirname, "../../web-client/build/");
 const assetsDir = path.join(dirname, "../../assets/");
 const indexContent = fs.readFileSync(path.join(webClientBuildDir, "index.html"), "utf8");
-const MML_DOCUMENT_PATH = path.join(dirname, "../../playground/build/index.js");
-const examplesWatchPath = path.resolve(path.join(dirname, "../examples"), "*.html");
+const MML_DOCUMENT_PATH = path.join(dirname, "../../playground/build/");
 
 // Specify the avatar to use here:
 const characterDescription: CharacterDescription = {
@@ -52,22 +50,12 @@ const userAuthenticator = new BasicUserAuthenticator(characterDescription, {
 const { app } = enableWs(express());
 app.enable("trust proxy");
 
-const reactMMLDocumentServer = new ReactMMLDocumentServer({
-  mmlDocumentPath: MML_DOCUMENT_PATH,
-  useWss: process.env.NODE_ENV === "production" || process.env.CODESANDBOX_HOST !== undefined,
-});
-
-// Handle playground document sockets
-app.ws("/playground", (ws) => {
-  reactMMLDocumentServer.handle(ws);
-});
-
 const networked3dWebExperienceServer = new Networked3dWebExperienceServer({
   networkPath: "/network",
   userAuthenticator,
   mmlServing: {
-    documentsWatchPath: examplesWatchPath,
-    documentsUrl: "/examples/",
+    documentsWatchPath: MML_DOCUMENT_PATH,
+    documentsUrl: "/",
   },
   webClientServing: {
     indexUrl: "/",
