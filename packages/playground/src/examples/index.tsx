@@ -1,15 +1,15 @@
-//import collisionEvents from "mml:./collision-events.html";
+import collisionEvents from "mml:./collision-events.html";
 import dice from "mml:./dice.html";
 import movingPlatform from "mml:./moving-platform.html";
-//import positionProbe from "mml:./position-probe.html";
+import positionProbe from "mml:./position-probe.html";
 import videoPlayer from "mml:./videoplayer.html";
 import weather from "mml:./weather.html";
 
 export {
-  //collisionEvents,
+  collisionEvents,
   dice,
   movingPlatform,
-  //positionProbe,
+  positionProbe,
   videoPlayer,
   weather,
 };

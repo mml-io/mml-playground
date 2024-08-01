@@ -1,7 +1,7 @@
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 import duck from "mml:../duck/index.tsx";
-import { dice, videoPlayer, weather, movingPlatform } from "../examples";
+import { dice, videoPlayer, weather, movingPlatform, collisionEvents, positionProbe } from "../examples";
 
 import {
   INTERACTIVE_SLOT_COUNT_X,
@@ -13,46 +13,46 @@ import {
 import { Slot } from "../Slot";
 
 const DEMO_SLOTS = [
-  //{
-  //  x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * -2,
-  //  z: 0,
-  //  documentUrl: `ws:///examples/collision-events.html`,
-  //  title: "Collision Events Demo",
-  //},
-  //{
-  //  x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * -2,
-  //  z: SPACE_BETWEEN_SLOTS + SLOT_DEPTH,
-  //  documentUrl: `ws:///examples/position-probe.html`,
-  //  title: "m-position-probe Demo",
-  //},
+  {
+    x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * -2,
+    z: 0,
+    documentUrl: collisionEvents,
+    title: "Collision Events Demo",
+  },
+  {
+    x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * -2,
+    z: SPACE_BETWEEN_SLOTS + SLOT_DEPTH,
+    documentUrl: positionProbe,
+    title: "m-position-probe Demo",
+  },
   {
     x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * -2,
     z: (SPACE_BETWEEN_SLOTS + SLOT_DEPTH) * 2,
-    documentUrl: `ws:///${movingPlatform}`,
+    documentUrl: movingPlatform,
     title: "Moving Platform Demo",
   },
   {
     x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * -1,
     z: 0,
-    documentUrl: `ws:///${duck}`,
+    documentUrl: duck,
     title: "Spinning Duck",
   },
   {
     x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * -1,
     z: SLOT_DEPTH + SPACE_BETWEEN_SLOTS,
-    documentUrl: `ws:///${dice}`,
+    documentUrl: dice,
     title: "Interactive Dice",
   },
   {
     x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * -1,
     z: (SLOT_DEPTH + SPACE_BETWEEN_SLOTS) * 2,
-    documentUrl: `ws:///${videoPlayer}`,
+    documentUrl: videoPlayer,
     title: "Video Player",
   },
   {
     x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * -1,
     z: (SLOT_DEPTH + SPACE_BETWEEN_SLOTS) * 3,
-    documentUrl: `ws:///${weather}`,
+    documentUrl: weather,
     title: "Weather API",
   },
   {
