@@ -5,8 +5,8 @@
     "build": "tsx ./build.ts --build",
     "iterate": "tsx --watch=./build.ts ./build.ts --watch",
     "type-check": "tsc --noEmit",
-    "lint": "eslint \"./src/**/*.{js,jsx,ts,tsx}\" --max-warnings 0",
-    "lint:fix": "eslint \"./src/**/*.{js,jsx,ts,tsx}\" --fix"
+    "lint": "eslint -c ./.eslintrc.cjs \"./src/**/*.{js,jsx,ts,tsx}\" --max-warnings 0",
+    "lint:fix": "eslint -c ./.eslintrc.cjs \"./src/**/*.{js,jsx,ts,tsx}\" --fix"
   },
   "dependencies": {
     "@types/react": "18.3.2",

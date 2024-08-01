@@ -1,3 +1,4 @@
+import React from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 
@@ -9,7 +10,8 @@ function Duck() {
   );
 }
 
-const container = document.getElementById("root") ?? document.body.appendChild(document.createElement("div"));
+const container =
+  document.getElementById("root") ?? document.body.appendChild(document.createElement("div"));
 const root = createRoot(container);
 flushSync(() => {
   root.render(<Duck />);

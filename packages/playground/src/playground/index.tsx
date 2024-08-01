@@ -1,7 +1,8 @@
+/*eslint import/no-unresolved: [2, { ignore: ['^mml:'] }]*/
+import duck from "mml:../duck/index.tsx";
+import React from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
-import duck from "mml:../duck/index.tsx";
-import { dice, videoPlayer, weather, movingPlatform, collisionEvents, positionProbe } from "../examples";
 
 import {
   INTERACTIVE_SLOT_COUNT_X,
@@ -10,6 +11,14 @@ import {
   SLOT_WIDTH,
   SPACE_BETWEEN_SLOTS,
 } from "../constants";
+import {
+  collisionEvents,
+  dice,
+  movingPlatform,
+  positionProbe,
+  videoPlayer,
+  weather,
+} from "../examples";
 import { Slot } from "../Slot";
 
 const DEMO_SLOTS = [
@@ -97,7 +106,8 @@ function App() {
   );
 }
 
-const container = document.getElementById("root") ?? document.body.appendChild(document.createElement("div"));
+const container =
+  document.getElementById("root") ?? document.body.appendChild(document.createElement("div"));
 const root = createRoot(container);
 flushSync(() => {
   root.render(<App />);

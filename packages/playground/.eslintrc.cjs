@@ -87,6 +87,9 @@ module.exports = {
         project: "tsconfig.json",
       },
     },
+    "import/no-unresolved": {
+      ignore: ['^mml:']
+    },
     "import/internal-regex": "^~",
     react: {
       version: "18.2",
