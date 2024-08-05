@@ -17,7 +17,8 @@ const PORT = process.env.PORT || 8080;
 const webClientBuildDir = path.join(dirname, "../../web-client/build/");
 const assetsDir = path.join(dirname, "../../assets/");
 const indexContent = fs.readFileSync(path.join(webClientBuildDir, "index.html"), "utf8");
-const MML_DOCUMENT_PATH = path.join(dirname, "../../playground/build/");
+const MML_DOCUMENT_ROOT = path.join(dirname, "../../playground/build/");
+const MML_DOCUMENT_WATCH_PATTERN = "**/*.html";
 
 // Specify the avatar to use here:
 const characterDescription: CharacterDescription = {
@@ -54,8 +55,9 @@ const networked3dWebExperienceServer = new Networked3dWebExperienceServer({
   networkPath: "/network",
   userAuthenticator,
   mmlServing: {
-    documentsWatchPath: MML_DOCUMENT_PATH,
+    documentsWatchPath: MML_DOCUMENT_WATCH_PATTERN,
     documentsUrl: "/",
+    documentsDirectoryRoot: MML_DOCUMENT_ROOT,
   },
   webClientServing: {
     indexUrl: "/",

@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "build": "tsx ./build.ts --build",
-    "iterate": "tsx --watch=./build.ts ./build.ts --watch",
+    "iterate": "tsx ./build.ts --watch",
     "type-check": "tsc --noEmit",
     "lint": "eslint -c ./.eslintrc.cjs \"./src/**/*.{js,jsx,ts,tsx}\" --max-warnings 0",
     "lint:fix": "eslint -c ./.eslintrc.cjs \"./src/**/*.{js,jsx,ts,tsx}\" --fix"
@@ -15,7 +15,9 @@
     "react-dom": "18.3.1"
   },
   "devDependencies": {
+    "@types/proper-lockfile": "^4.1.4",
     "@types/uuid": "^10.0.0",
+    "proper-lockfile": "^4.1.2",
     "uuid": "^10.0.0"
   }
 }

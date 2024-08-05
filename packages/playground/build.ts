@@ -1,10 +1,8 @@
-import { v5 as uuidv5 } from "uuid";
+import lockfile from "proper-lockfile";
 import path, { relative, resolve, join } from "node:path";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import crypto from "node:crypto";
-
-import { rimrafSync } from "rimraf";
 
 import * as esbuild from "esbuild";
 
@@ -13,24 +11,31 @@ const watchMode = "--watch";
 
 const helpString = `Mode must be provided as one of ${buildMode} or ${watchMode}`;
 
+const jsExt = /\.js$/;
 
-function rmEmptyDirs(dir: string, log?: (...args: any[]) => void) {
-  if (!fs.statSync(dir).isDirectory()) {
+function cleanupJS(path: string, log?: (...args: any[]) => void) {
+  const stat = fs.statSync(path);
+  const isJS = stat.isFile() && jsExt.test(path);
+  if (isJS) {
+    fs.rmSync(path);
     return;
   }
-  let files = fs.readdirSync(dir);
+  if (!stat.isDirectory()) {
+    return;
+  }
+  let files = fs.readdirSync(path);
   if (files.length > 0) {
     for (const file of files) {
-      rmEmptyDirs(join(dir, file), log);
+      cleanupJS(join(path, file), log);
     }
     // re-evaluate files; after deleting subfolder
     // we may have parent folder empty now
-    files = fs.readdirSync(dir);
+    files = fs.readdirSync(path);
   }
 
   if (files.length == 0) {
-    log?.("Removing:", dir);
-    fs.rmdirSync(dir);
+    log?.("Removing:", path);
+    fs.rmdirSync(path);
     return;
   }
 }
@@ -68,9 +73,8 @@ function mmlPlugin({
 ): esbuild.Plugin {
   const log = verbose ? (...args: any[]) => console.log("[mml]:", ...args) : () => { };
 
-  const results: esbuild.BuildResult[] = [];
-
-  const importStubs: Record<string, string> = {};
+  let results: esbuild.BuildResult[] = [];
+  let importStubs: Record<string, string> = {};
 
   // We create a new non-root instance of the plugin anytime we need to run a child build process
   // This signifies to the the child plugin that it should store its result in the `results` array
@@ -81,6 +85,22 @@ function mmlPlugin({
       // We rely on the metfile to perform JS-to-HTML embedding and file renames.
       build.initialOptions.metafile = true;
       const outdir = resolve(__dirname, build.initialOptions.outdir ?? "build");
+
+      build.onStart(async () => {
+        if (isRoot) {
+          log("onStart: acquiring lock on build directory");
+          fs.mkdirSync(outdir, { recursive: true });
+          try {
+            lockfile.lockSync(outdir);
+          } catch (error) {
+            return {
+              errors: [{ text: "failed to acquire lock on build directory", detail: error }]
+            }
+          }
+          results = [];
+          importStubs = {};
+        }
+      });
 
       // Main entry point for any imports that are prefixed with "mml:".
       // We strip the prefix and resolve the path with esbuild before handing off to
@@ -113,6 +133,7 @@ function mmlPlugin({
         return { contents: importStub, loader: "text" };
       });
 
+
       // Any raw HTML files should just be copied to the build directory.
       // TODO: These could contain script tags with references to local files,
       //       we may want to consider loading and embedding them directly into the HTML.
@@ -144,22 +165,26 @@ function mmlPlugin({
 
         Object.assign(result, combinedResults);
 
+        if (result.errors.length > 0) {
+          log("onEnd: errors in build, releasing lock on build directory");
+          lockfile.unlockSync(outdir);
+          return;
+        }
+
         // If we have a any js files, that do not have a corresponding HTML file,
         // we need to create one and embed the JavaScript into a <script> tag.
         // Then we can delete the JavaScript file as it is no longer needed.
-        const jsExt = /\.js$/;
         const outputs = result.metafile!.outputs;
         for (const [jsPath, meta] of Object.entries(outputs)) {
           if (jsExt.test(jsPath)) {
             const htmlPath = jsPath.replace(/\.js$/, ".html");
             if (!(htmlPath in outputs)) {
+              delete outputs[jsPath]
               const js = await fsp.readFile(jsPath, { encoding: "utf8" });
               const html = `<body></body><script>${js}</script>`;
               await fsp.writeFile(htmlPath, html);
               outputs[htmlPath] = { ...meta, bytes: meta.bytes + 30 };
             }
-            fsp.rm(jsPath)
-            delete outputs[jsPath]
           }
         }
 
@@ -181,7 +206,7 @@ function mmlPlugin({
           }
         }
 
-        rmEmptyDirs(outdir, log);
+        cleanupJS(outdir, log);
 
         // Now we go through all of the output files and rewrite the import stubs to
         // correct output path.
@@ -196,7 +221,11 @@ function mmlPlugin({
             await fsp.writeFile(output, contents);
           });
 
-        log("onEnd", result);
+
+        log("onEnd: releasing lock on build directory");
+        lockfile.unlockSync(outdir);
+
+        log("onEnd", JSON.stringify(result, undefined, 2));
       });
     },
   })
@@ -206,9 +235,6 @@ function mmlPlugin({
 
 const outdir = path.join(__dirname, "build")
 
-// TODO: put this behind a flag?
-rimrafSync(outdir);
-
 const buildOptions: esbuild.BuildOptions = {
   entryPoints: ["./src/playground/index.tsx"],
   outdir,
@@ -217,7 +243,7 @@ const buildOptions: esbuild.BuildOptions = {
   write: true,
   assetNames: "[dir]/[name]",
   entryNames: "[dir]/[name]",
-  plugins: [mmlPlugin()],
+  plugins: [mmlPlugin({ verbose: false })],
 };
 
 const args = process.argv.splice(2);
