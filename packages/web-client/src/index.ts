@@ -18,6 +18,6 @@ const app = new Networked3dWebExperienceClient(holder, {
     doubleJumpAnimationFileUrl: "./assets/models/anim_double_jump.glb",
   },
   skyboxHdrJpgUrl: "./assets/hdr/puresky_2k.jpg",
-  mmlDocuments: [{ url: `${protocol}//${host}/playground` }],
+  mmlDocuments: [{ url: `${protocol}//${host}/playground/index.html` }],
 });
 app.update();

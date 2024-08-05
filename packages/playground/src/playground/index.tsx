@@ -1,4 +1,6 @@
-import * as React from "react";
+/*eslint import/no-unresolved: [2, { ignore: ['^mml:'] }]*/
+import duck from "mml:../duck/index.tsx";
+import React from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 
@@ -8,50 +10,58 @@ import {
   SLOT_DEPTH,
   SLOT_WIDTH,
   SPACE_BETWEEN_SLOTS,
-} from "./constants";
-import { Slot } from "./Slot";
+} from "../constants";
+import {
+  collisionEvents,
+  dice,
+  movingPlatform,
+  positionProbe,
+  videoPlayer,
+  weather,
+} from "../examples";
+import { Slot } from "../Slot";
 
 const DEMO_SLOTS = [
   {
     x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * -2,
     z: 0,
-    documentUrl: `${(window as any).params.wsProtocol}:///examples/collision-events.html`,
+    documentUrl: collisionEvents,
     title: "Collision Events Demo",
   },
   {
     x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * -2,
     z: SPACE_BETWEEN_SLOTS + SLOT_DEPTH,
-    documentUrl: `${(window as any).params.wsProtocol}:///examples/position-probe.html`,
+    documentUrl: positionProbe,
     title: "m-position-probe Demo",
   },
   {
     x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * -2,
     z: (SPACE_BETWEEN_SLOTS + SLOT_DEPTH) * 2,
-    documentUrl: `${(window as any).params.wsProtocol}:///examples/moving-platform.html`,
+    documentUrl: movingPlatform,
     title: "Moving Platform Demo",
   },
   {
     x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * -1,
     z: 0,
-    documentUrl: `${(window as any).params.wsProtocol}:///examples/duck.html`,
+    documentUrl: duck,
     title: "Spinning Duck",
   },
   {
     x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * -1,
     z: SLOT_DEPTH + SPACE_BETWEEN_SLOTS,
-    documentUrl: `${(window as any).params.wsProtocol}:///examples/dice.html`,
+    documentUrl: dice,
     title: "Interactive Dice",
   },
   {
     x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * -1,
     z: (SLOT_DEPTH + SPACE_BETWEEN_SLOTS) * 2,
-    documentUrl: `${(window as any).params.wsProtocol}:///examples/videoplayer.html`,
+    documentUrl: videoPlayer,
     title: "Video Player",
   },
   {
     x: (SLOT_WIDTH + SPACE_BETWEEN_SLOTS) * -1,
     z: (SLOT_DEPTH + SPACE_BETWEEN_SLOTS) * 3,
-    documentUrl: `${(window as any).params.wsProtocol}:///examples/weather.html`,
+    documentUrl: weather,
     title: "Weather API",
   },
   {
@@ -96,8 +106,8 @@ function App() {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-const container = document.getElementById("root")!;
+const container =
+  document.getElementById("root") ?? document.body.appendChild(document.createElement("div"));
 const root = createRoot(container);
 flushSync(() => {
   root.render(<App />);

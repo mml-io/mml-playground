@@ -23,6 +23,7 @@ declare global {
       ["m-interaction"]: CustomElement<any>;
       ["m-chat-probe"]: CustomElement<any>;
       ["m-position-probe"]: CustomElement<any>;
+      ["m-attr-anim"]: CustomElement<any>;
     }
   }
 }
