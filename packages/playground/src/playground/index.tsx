@@ -1,5 +1,6 @@
 /*eslint import/no-unresolved: [2, { ignore: ['^mml:'] }]*/
-import duck from "mml:../duck/index.tsx";
+import { Duck } from "../duck/index";
+import duck from "mml:../duck/index";
 import React from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
@@ -83,6 +84,7 @@ function App() {
   }
   return (
     <>
+      { /* <Duck /> */}
       {DEMO_SLOTS.map((slot, index) => {
         return (
           <Slot

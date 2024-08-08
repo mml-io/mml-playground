@@ -8,7 +8,7 @@
   "main": "./src/index.js",
   "type": "module",
   "scripts": {
-    "iterate": "concurrently \"tsx build.ts --watch\" \"nodemon\"",
+    "iterate": "concurrently 'tsx build.ts --watch' nodemon",
     "build": "rimraf ./build && tsx build.ts --build",
     "start": "NODE_ENV=production node build/index.js",
     "type-check": "tsc --noEmit",

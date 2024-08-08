@@ -2,9 +2,9 @@ import React from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 
-function Duck() {
+export function Duck() {
   return (<>
-    <m-model id="duck" src="/assets/duck.glb" sx="2" sy="2" sz="2">
+    <m-model id="duck" src="https://public.mml.io/duck.glb" sx="2" sy="2" sz="2">
       <m-attr-anim attr="ry" start="0" end="360" duration="4000"></m-attr-anim>
     </m-model>
   </>);
