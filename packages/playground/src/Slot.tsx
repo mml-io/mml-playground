@@ -1,3 +1,4 @@
+import { MMLClickEvent } from "@mml-io/mml-react-types";
 import * as React from "react";
 import { useEffect, useState } from "react";
 
@@ -85,13 +86,12 @@ export function Slot(props: { x: number; z: number; demo?: { url: string; title:
     >
       {loadedState ? (
         <>
-          <m-frame className="document-frame" y="0.2" src={loadedState.url}></m-frame>
+          <m-frame y="0.2" src={loadedState.url}></m-frame>
           <m-group
-            className="remove-document"
             visible-to={loadedState.removable ? loadedState.userId : ""}
             x={(SLOT_WIDTH - SLOT_BORDER_THICKNESS) / 2}
             z={(SLOT_DEPTH - SLOT_BORDER_THICKNESS) / 2}
-            onClick={(event: CustomEvent<{ connectionId: number }>) => {
+            onClick={(event: MMLClickEvent) => {
               const { connectionId } = event.detail;
               if (loadedState && loadedState.removable && loadedState.userId === connectionId) {
                 setLoadedState(null);
