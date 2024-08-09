@@ -15,11 +15,8 @@
     "react-dom": "18.3.1"
   },
   "devDependencies": {
+    "@mml-io/esbuild-plugin-mml": "git://github.com/mml-io/esbuild-plugin-mml.git#c108ba025216e1944511b96c0df6651cc95b2070",
     "@types/node-gzip": "^1.1.3",
-    "@types/proper-lockfile": "^4.1.4",
-    "@types/uuid": "^10.0.0",
-    "node-gzip": "^1.1.2",
-    "proper-lockfile": "^4.1.2",
-    "uuid": "^10.0.0"
+    "node-gzip": "^1.1.2"
   }
 }
