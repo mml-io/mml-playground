@@ -4,7 +4,11 @@
     "outDir": "./dist",
     "target": "ES2020",
     "jsx": "react-jsx",
-    "lib": ["esnext", "dom", "dom.iterable"],
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable"
+    ],
     "noImplicitAny": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
@@ -15,14 +19,21 @@
     "esModuleInterop": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "moduleResolution": "node",
+    "moduleResolution": "NodeNext",
     "noUnusedLocals": false,
     "baseUrl": ".",
     "paths": {
-      "tests/*": ["tests/*"]
+      "tests/*": [
+        "tests/*"
+      ]
     },
     "skipLibCheck": true
   },
-  "exclude": ["node_modules"],
-  "include": ["./src/**/*.ts*", "./build.ts"]
+  "exclude": [
+    "node_modules"
+  ],
+  "include": [
+    "./src/**/*.ts*",
+    "./build.ts"
+  ]
 }

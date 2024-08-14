@@ -1,6 +1,7 @@
 {
   "name": "@mml-playground/mml-doc",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "tsx ./build.ts --build",
     "iterate": "tsx ./build.ts --watch",
@@ -16,6 +17,7 @@
   },
   "devDependencies": {
     "@mml-io/esbuild-plugin-mml": "git://github.com/mml-io/esbuild-plugin-mml.git#c108ba025216e1944511b96c0df6651cc95b2070",
+    "@mml-io/mserve": "git://github.com/mml-io/mserve.git#bd49fe51b6c778dde5a59400f959596cb2cb26ba",
     "@types/node-gzip": "^1.1.3",
     "node-gzip": "^1.1.2"
   }
