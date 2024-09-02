@@ -19,7 +19,7 @@
     "esModuleInterop": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "moduleResolution": "NodeNext",
+    "moduleResolution": "node",
     "noUnusedLocals": false,
     "baseUrl": ".",
     "paths": {
@@ -33,7 +33,6 @@
     "node_modules"
   ],
   "include": [
-    "./src/**/*.ts*",
-    "./build.ts"
+    "./src/**/*.ts*"
   ]
 }

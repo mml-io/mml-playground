@@ -1,5 +1,6 @@
-/*eslint import/no-unresolved: [2, { ignore: ['^mml:'] }]*/
-import duck from "mml:../duck/index";
+// eslint-disable-next-line import/no-unresolved
+import duck from "mml:../duck";
+// eslint-disable-next-line import/default
 import React from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";

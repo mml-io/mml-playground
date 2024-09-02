@@ -6,11 +6,4 @@ import positionProbe from "mml:./position-probe.html";
 import videoPlayer from "mml:./videoplayer.html";
 import weather from "mml:./weather.html";
 
-export {
-  collisionEvents,
-  dice,
-  movingPlatform,
-  positionProbe,
-  videoPlayer,
-  weather
-};
+export { collisionEvents, dice, movingPlatform, positionProbe, videoPlayer, weather };

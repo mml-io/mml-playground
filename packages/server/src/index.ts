@@ -20,6 +20,10 @@ const indexContent = fs.readFileSync(path.join(webClientBuildDir, "index.html"),
 const MML_DOCUMENT_ROOT = path.join(dirname, "../../playground/build/");
 const MML_DOCUMENT_WATCH_PATTERN = "**/*.html";
 
+fs.cpSync(path.join(MML_DOCUMENT_ROOT, "world.json"), path.join(webClientBuildDir, "world.json"), {
+  force: true,
+});
+
 // Specify the avatar to use here:
 const characterDescription: CharacterDescription = {
   // Option 1 (Default) - Use a GLB file directly
