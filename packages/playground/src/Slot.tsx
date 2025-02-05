@@ -86,38 +86,40 @@ export function Slot(props: { x: number; z: number; demo?: { url: string; title:
     >
       {loadedState ? (
         <>
-          <m-frame y="0.2" src={loadedState.url}></m-frame>
-          <m-group
-            visible-to={loadedState.removable ? loadedState.userId : ""}
-            x={(SLOT_WIDTH - SLOT_BORDER_THICKNESS) / 2}
-            z={(SLOT_DEPTH - SLOT_BORDER_THICKNESS) / 2}
-            onClick={(event: MMLClickEvent) => {
-              const { connectionId } = event.detail;
-              if (loadedState && loadedState.removable && loadedState.userId === connectionId) {
-                setLoadedState(null);
-              }
-            }}
-          >
-            <m-cube
-              width={SLOT_BORDER_THICKNESS}
-              depth={SLOT_BORDER_THICKNESS}
-              height="0.5"
-              color="#b91c1c"
-            ></m-cube>
+          <m-frame ry={180} y="0.2" src={loadedState.url}></m-frame>
+          {!props.demo && (
+            <m-group
+              visible-to={loadedState.removable ? loadedState.userId : ""}
+              x={(SLOT_WIDTH - SLOT_BORDER_THICKNESS) / 2}
+              z={(SLOT_DEPTH - SLOT_BORDER_THICKNESS) / 2}
+              onClick={(event: MMLClickEvent) => {
+                const { connectionId } = event.detail;
+                if (loadedState && loadedState.removable && loadedState.userId === connectionId) {
+                  setLoadedState(null);
+                }
+              }}
+            >
+              <m-cube
+                width={SLOT_BORDER_THICKNESS}
+                depth={SLOT_BORDER_THICKNESS}
+                height="0.5"
+                color="#b91c1c"
+              ></m-cube>
 
-            <m-label
-              content={`Remove
+              <m-label
+                content={`Remove
           document`}
-              color="#f87171"
-              font-size="18"
-              alignment="left"
-              width={SLOT_BORDER_THICKNESS}
-              height="1"
-              rx="-90"
-              rz="90"
-              y="0.26"
-            ></m-label>
-          </m-group>
+                color="#f87171"
+                font-size="18"
+                alignment="left"
+                width={SLOT_BORDER_THICKNESS}
+                height="1"
+                rx="-90"
+                rz="90"
+                y="0.26"
+              />
+            </m-group>
+          )}
         </>
       ) : (
         <>

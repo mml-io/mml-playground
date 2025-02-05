@@ -1,12 +1,11 @@
-import fs from "fs";
-import path from "path";
-import url from "url";
-
 import { Networked3dWebExperienceServer } from "@mml-io/3d-web-experience-server";
 import { CharacterDescription } from "@mml-io/3d-web-user-networking";
 import dotenv from "dotenv";
 import express from "express";
 import enableWs from "express-ws";
+import fs from "fs";
+import path from "path";
+import url from "url";
 
 import { BasicUserAuthenticator } from "./BasicUserAuthenticator";
 import { ReactMMLDocumentServer } from "./ReactMMLDocumentServer";
@@ -19,6 +18,7 @@ const webClientBuildDir = path.join(dirname, "../../web-client/build/");
 const assetsDir = path.join(dirname, "../../assets/");
 const indexContent = fs.readFileSync(path.join(webClientBuildDir, "index.html"), "utf8");
 const MML_DOCUMENT_PATH = path.join(dirname, "../../playground/build/index.js");
+const examplesDirectory = path.resolve(path.join(dirname, "../examples"));
 const examplesWatchPath = path.resolve(path.join(dirname, "../examples"), "*.html");
 
 // Specify the avatar to use here:
@@ -47,6 +47,9 @@ const userAuthenticator = new BasicUserAuthenticator(characterDescription, {
    This is useful for development, but in deployed usage, it is recommended to set this to false.
   */
   devAllowUnrecognizedSessions: true,
+
+  /* This option allows any user to change their identity at any time. Set this to false to prevent all identity changes. */
+  allowAllUserIdentityChanges: true,
 });
 
 const { app } = enableWs(express());
@@ -67,6 +70,7 @@ const networked3dWebExperienceServer = new Networked3dWebExperienceServer({
   userAuthenticator,
   mmlServing: {
     documentsWatchPath: examplesWatchPath,
+    documentsDirectoryRoot: examplesDirectory,
     documentsUrl: "/examples/",
   },
   webClientServing: {

@@ -21,6 +21,6 @@ export function DocumentLabel(props: { label: string; rz: number; x: number; z: 
       rz={props.rz}
       z={props.z || 0}
       x={props.x || 0}
-    ></m-label>
+    />
   );
 }
