@@ -1,4 +1,4 @@
-import { LoadingProgressManager } from "mml-web";
+import { LoadingProgressManager } from "@mml-io/mml-web";
 
 export class LoadingScreen {
   public readonly element: HTMLDivElement;

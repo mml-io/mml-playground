@@ -1,8 +1,7 @@
+import { EditableNetworkedDOM, LocalObservableDOMFactory } from "@mml-io/networked-dom-server";
+import chokidar, { FSWatcher } from "chokidar";
 import fs from "fs";
 import url from "url";
-
-import chokidar from "chokidar";
-import { EditableNetworkedDOM, LocalObservableDOMFactory } from "networked-dom-server";
 import WebSocket from "ws";
 
 const getMmlDocumentContent = (documentPath: string) => {
@@ -20,6 +19,7 @@ export type ReactMMLDocumentServerOptions = {
 
 export class ReactMMLDocumentServer {
   private mmlDocument: EditableNetworkedDOM;
+  private watcher: FSWatcher;
 
   constructor(private options: ReactMMLDocumentServerOptions) {
     this.mmlDocument = new EditableNetworkedDOM(
@@ -28,7 +28,11 @@ export class ReactMMLDocumentServer {
     );
 
     // Watch for changes in DOM file and reload
-    chokidar.watch(this.options.mmlDocumentPath).on("change", () => {
+    this.watcher = chokidar.watch(this.options.mmlDocumentPath, {
+      ignored: /^\./,
+      persistent: true,
+    });
+    this.watcher.on("change", () => {
       this.reload();
     });
     this.reload();

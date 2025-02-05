@@ -22,6 +22,10 @@
     userCube.setAttribute("height", 0.25);
     userCube.setAttribute("depth", 0.25);
     userCube.setAttribute("color", `#${Math.floor(Math.random() * 0xffffff).toString(16)}`);
+    const attributeLerp = document.createElement("m-attr-lerp");
+    attributeLerp.setAttribute("attr", "all");
+    attributeLerp.setAttribute("duration", "100");
+    userCube.append(attributeLerp);
     userPresenceHolder.append(userCube);
     const newUser = {
       cube: userCube,

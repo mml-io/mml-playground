@@ -1,7 +1,6 @@
-import crypto from "crypto";
-
-import { UserIdentity } from "@mml-io/3d-web-user-networking";
 import type { CharacterDescription, UserData } from "@mml-io/3d-web-user-networking";
+import { UserIdentity } from "@mml-io/3d-web-user-networking";
+import crypto from "crypto";
 import express from "express";
 
 export type AuthUser = {
@@ -14,6 +13,7 @@ export type AuthUser = {
 };
 
 export type BasicUserAuthenticatorOptions = {
+  allowAllUserIdentityChanges?: boolean;
   devAllowUnrecognizedSessions: boolean;
 };
 
@@ -30,15 +30,18 @@ export class BasicUserAuthenticator {
     private options: BasicUserAuthenticatorOptions = defaultOptions,
   ) {}
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public async generateAuthorizedSessionToken(req: express.Request): Promise<string> {
-    const sessionToken = crypto.randomBytes(20).toString("hex");
-    const authUser: AuthUser = {
-      clientId: null,
-      sessionToken,
-    };
+    return new Promise((resolve) => {
+      const sessionToken = crypto.randomBytes(20).toString("hex");
+      const authUser: AuthUser = {
+        clientId: null,
+        sessionToken,
+      };
 
-    this.userBySessionToken.set(sessionToken, authUser);
-    return sessionToken;
+      this.userBySessionToken.set(sessionToken, authUser);
+      resolve(sessionToken);
+    });
   }
 
   public onClientConnect(
@@ -93,12 +96,27 @@ export class BasicUserAuthenticator {
   }
 
   public onClientUserIdentityUpdate(clientId: number, msg: UserIdentity): UserData | null {
-    // This implementation does not allow updating user data after initial connect.
-
-    // To allow updating user data after initial connect, return the UserData object that reflects the requested change.
-
-    // Returning null will not update the user data.
-    return null;
+    if (this.options.allowAllUserIdentityChanges) {
+      const existing = this.usersByClientId.get(clientId);
+      if (!existing) {
+        console.error("onClientUserIdentityUpdate - client not connected");
+        return null;
+      }
+      if (!existing.userData) {
+        console.error("onClientUserIdentityUpdate - user data not initialized");
+        return null;
+      }
+      return {
+        username: msg.username ?? existing.userData.username,
+        characterDescription: msg.characterDescription ?? existing.userData.characterDescription,
+      };
+    } else {
+      console.error("onClientUserIdentityUpdate - not allowed");
+      // This implementation does not allow updating user data after initial connect.
+      // To allow updating user data after initial connect, return the UserData object that reflects the requested change.
+      // Returning null will not update the user data.
+      return null;
+    }
   }
 
   public onClientDisconnect(clientId: number) {
